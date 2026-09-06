@@ -49,4 +49,19 @@ disp(V)
 
 save vstarVI.mat V
 
-% questo non converge...
+%% IMPLEMENTAZIONE GRAFICA
+capitale = 0:100;   % stato s = capitale + 1, corrispondenza diretta
+
+figure()
+plot(capitale, V, 'LineWidth', 1.5)
+xlabel('Capitale')
+ylabel('V(capitale)')
+title('Funzione valore ottima — Value Iteration')
+grid on
+
+figure()
+stairs(capitale, pi, 'LineWidth', 1.5)
+xlabel('Capitale')
+ylabel('Puntata ottima')
+title('Politica ottima — Value Iteration')
+grid on
