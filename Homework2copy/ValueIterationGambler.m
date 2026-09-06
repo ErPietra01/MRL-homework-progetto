@@ -7,7 +7,7 @@ rng(2);
 load GamblerModello.mat
 
 % soglia del value iteration
-theta = 0.9;
+theta = 1e-6;
 
 S = size(R,1);
 A = size(R,2);
