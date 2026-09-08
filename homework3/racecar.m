@@ -1,13 +1,43 @@
+% funzione che aggiorna lo stato in base alle decisioni dell'algoritmo
+% cosa fa la funzione?
+% la macchina riceve la griglia e la posizione corrente sulla griglia, le
+% velocità lungo gli assi, e l'azione (ovvero l'accelerazione scelta
+% lungo entrambi gli assi); in questo modo aggiorna la posizione sulla
+% griglia e valuta se può continuare o se ha perso
+function [nuovax, nuovay, nuovavx, nuovavy, r] = racecar(posx, posy, ...
+    velx, vely, accx, accy, griglia)
 
-function [next, reward] = racecar[s,a]
-% seguendo la logica dell'algoritmo, la funzione viene utilizzata in ogni
-% stato per valutare la reward e lo stato successivo.
+vx = velx;
+vy = vely;
+ax = accx;
+ay = accy;
 
+% aggiorno la velocità in entrambe le direzioni in base all'accelerazione
+% scelta
+nuovavx = vx + ax; 
+nuovavy = vy + ay; 
+fprintf ('nuove velocità: vx = %d, vy = %d', nuovavx, nuovavy)
 
-% stato: posizione, accelerazione, direzione
+% aggiorno la posizione sulla griglia in base a di quanto mi sposto grazie
+% alle nuove velocità
+nuovax = posx + min(nuovavx,5);
+nuovay = posy + min(nuovavy,5);
+
+% verifica della posizione sulla griglia: vittoria, sconfitta o continua
+% disp("stampo la griglia");
+% disp(griglia);
+
+fprintf ('nuove coordinate sulla griglia: %d, %d',nuovax, nuovay);
+if griglia(nuovax, nuovay) == 0 % mi trovo sul circuito
+    r = -1;
+elseif griglia(nuovax,nuovay) == -1 % sono uscito dai bordi
+    r = -5; % perdo e devo ricominciare l'episodio
+else % mi trovo sulla linea del traguardo
+    r = 1;
 
 end
 
+% 
 
 
 % per l'homework: assegno ai pixel una reward istantanea
@@ -38,12 +68,16 @@ end
 
 % bozza in pseudocodice:
 
-% [ascissa, ordinata, accelerazione, direzione] = ind2sub([20,20,5,4], s)
+% [ascissa, ordinata, velocità, direzione] = ind2sub([20,20,3,2], s)
 
 
-% commenti;
-% per rendere tutto più agevole, si potrebbe pensare di indicizzare le
-% coordinate con un unico valore, per poi usarle nell'ind2sub principale
+% commenti
 % la gestione delle coordinate dei punti d'interesse (traguardo e bordi)
 % devono avvenire dopo sub2ind in modo tale da semplificare la ricerca
 % della corrispondenza
+% la funzione restituisce la variazione di velocità e la direzione, in modo
+% tale che l'algoritmo scelga il nuovo stato 
+% azioni: -1,0,1 a seconda di quanto voglio aumentare, e la direzione
+% devo modificare l'accelerazione (delta v)
+% bisognerebbe anche verificare la posizione sulla mappa per aggiornare la
+% reward

@@ -1,0 +1,14 @@
+clear all
+close all
+clc
+
+
+S = 20*20*3*2;
+s = randi(S)
+fprintf('s = %d',s);
+a = 1; 
+grid = ones(20,20);
+acc = 1;
+v = 3;
+
+[prox, r, v] = racecar(s,a,acc, grid, v)
