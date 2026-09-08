@@ -30,7 +30,8 @@ nuovay = posy + min(nuovavy,5);
 fprintf ('nuove coordinate sulla griglia: %d, %d',nuovax, nuovay);
 if griglia(nuovax, nuovay) == 0 % mi trovo sul circuito
     r = -1;
-elseif griglia(nuovax,nuovay) == -1 % sono uscito dai bordi
+elseif griglia(nuovax,nuovay) == -1 || nuovax > 20 || nuovax < 0 ||nuovay >20 || nuovay < 0
+    % sono uscito dai bordi del circuito o dai confini della griglia
     r = -5; % perdo e devo ricominciare l'episodio
 else % mi trovo sulla linea del traguardo
     r = 1;
