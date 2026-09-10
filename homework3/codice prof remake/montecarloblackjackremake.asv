@@ -1,0 +1,171 @@
+clear all
+close all
+clc
+
+rng(1)
+
+% Definiamo l'algoritmo che permetterà
+% all'agente di giocare a blackjack
+% aggiornando di volta in volta la 
+% policy e la funzione qualità tramite
+% metodi Monte-Carlo
+
+% definizione dello spazio di stato 
+% e delle azioni:
+
+A = 2; %(hit/stick)
+
+% possibili mani che può avere l'agente,
+% tenendo conto del valore delle figure
+% e dell'asso e del fatto che l'agente
+% gioca solo se ha almeno 12
+numhands = 10; % 12-21
+% valore della carta scoperta del banco
+numdealer = 10; %1-10
+% valore dell'asso: 1 oppure 10 a seconda
+% delle carte nella mano del giocatore
+numusableace = 2;
+% I possibili stati in cui si trova 
+% l'agente dipendono quindi da cosa ha 
+% il banco, il valore totale della 
+% propria mano, e il possibile valore
+% dell'asso
+
+% spazio degli stati:
+S = numhands*numdealer*numusableace;
+
+% matrice dei valori delle coppie stato-azione
+Q = zeros (S,A);
+
+% policy inizializzata a valori casuali:
+% creo un vettore colonna di S elementi
+% in cui ognuno è una azione casuale
+% sostanzialmente, a ogni possibile indice
+% degli stati associo una azione casuale
+policy = randi(A,[S,1]);
+
+% assegno il valore iniziale di
+% ciascuno stato; lo aggiornerò a ogni
+% iterazione
+valueprevious = -ones(S,1);
+
+% variabili di controllo 
+% ogni coppia deve essere visitata
+% almeno 1000 volte
+minvisits = 1000;
+% per policy e-soft: preservare 
+% l'esplorazione
+epsilon = 0.1;
+gamma = 1;
+%stepsize
+alpha = 1e-3;
+% soglia di tolleranza per 
+% interrompere l'algoritmo
+toll = 8e-2;
+
+% ALGORITMO MONTE CARLO
+while true
+    % aggiorno quante volte ho visitato
+    % la coppia in questo episodio
+    N = zeros(S,A);
+
+    while min(N(:)) < minvisits
+        % exploring start: scelgo
+        % randomicamente una coppia
+        s0 = randi(s);
+        a0 = randi(A);
+% tramite la funzione dedicata, calcolo
+% lo stato successivo e la reward
+% istantanea
+        [s1,r1] = bj(s0,a0);
+        % aggiorno la storia dell'episodio
+        states = [s0,s1];
+        actions = a0;
+        rewards = r1;
+        s = s1;
+
+% A partire dallo stato iniziale genero 
+% un episodio
+        % fino allo stato terminale
+        % (che bj restituirà come -1)
+        while s ~= -1
+            % azione casuale o con policy
+            if rand < epsilon
+                a = randi(A);
+            else
+                % viene scelta l'azione
+                % associata a s tramite
+                % la policy
+                a = policy(s);
+            end
+
+            % ora costruisco l'episodio
+            [sp, r] = bj(s,a)
+            states = [states,sp];
+            actions = [actions, a];
+            rewards = [rewards, r];
+            s = sp;
+        end
+
+        % ora considero tutti gli stati
+        % in cui faccio una transizione
+        % ovvero tutti tranne l'ultimo
+
+        states = states(1:end-1);
+        % lunghezza dell'episodio
+        T = length (states);
+
+        % costruzione della reward
+        % cumulativa
+        G = 0; 
+        for t = T:-1:1
+            % sommo alla reward cumulativa
+            % la reward istantanea
+            G = gamma * G + rewards(t);
+            
+            % ora aggiorno il numero di
+            % visite in qusta iterazione
+            % e il valore globale delle
+            % coppie
+            N(states(t), actions(t)) = N(states(t), actions(t)) + 1;
+            Q(states(t), actions(t)) = Q(states(t), actions(t)) + ...
+                alpha * (G - Q(states(t), actions(t)));
+            % stepsize fisso; l'algoritmo 
+            % sarebbe con alpha variabile
+        end
+    end
+    % calcolo funzione valore
+    value = zeros(S,1);
+    for s = 1:S
+        value = Q(s,policy(s));
+    end
+
+    % Aggiornamento della policy:
+    % costruisco il nuovo vettore
+    % che poi sostituirò a quello 
+    % originale
+    policyp = zeros(S,1);
+    for s = 1:S
+        % per ogni stato, cerco 
+        % l'azione che restituisce il
+        % valore maggiore per la coppia
+        % stato-azione
+        policyp(s) = find(Q(s,:) == max(Q(s,:)), 1,'first');
+
+    end
+    % ora confronto i valori calcolati
+    % con quelli salvati; se non 
+    % migliorano, interrompo 
+    % l'algoritmo
+    if norm(value - valueprevious, Inf) < toll
+        break;
+    else
+        disp(norm(value - valueprevious, Inf));
+        disp(norm(policyp - policy, 1));
+    end
+
+    % aggiorno la po
+    
+end
+
+% 

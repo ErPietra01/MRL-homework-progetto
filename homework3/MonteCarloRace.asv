@@ -2,13 +2,20 @@ clear all
 close all
 clc
 
+gridsize = 20;
+A = 9; % spazio delle azioni: combinazioni delle possibili accelerazioni 
+       % lungo i due assi
+acceleration = [-1,0,1]; % accelerazioni (1=avanti, 0=fermo, -1=indietro)
 
-S = 20*20*3*2;
-s = randi(S)
-fprintf('s = %d',s);
-a = 1; 
-grid = ones(20,20);
-acc = 1;
-v = 3;
+grid = zeros(gridsize,gridsize); %gridworld su cui si muove la macchina
 
-[prox, r, v] = racecar(s,a,acc, grid, v)
+for i = 6:gridsize
+    for j = 0: gridsize
+
+    end
+end
+
+% [nuovax, nuovay, nuovavx, nuovavy, r] = racecar2(posx, posy, ...
+%     velx, vely, accx, accy, griglia)
+
+%
