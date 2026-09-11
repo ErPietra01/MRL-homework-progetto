@@ -72,7 +72,7 @@ while true
     while min(N(:)) < minvisits
         % exploring start: scelgo
         % randomicamente una coppia
-        s0 = randi(s);
+        s0 = randi(S);
         a0 = randi(A);
 % tramite la funzione dedicata, calcolo
 % lo stato successivo e la reward

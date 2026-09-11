@@ -5,7 +5,9 @@
 % lungo entrambi gli assi); in questo modo aggiorna la posizione sulla
 % griglia e valuta se può continuare o se ha perso
 function [nuovax, nuovay, nuovavx, nuovavy, r] = racecar(posx, posy, ...
-    velx, vely, accx, accy, griglia)
+    velx, vely, accx, accy)
+
+load CircuitoMonteCarlo.mat grid gridsize
 
 vx = velx;
 vy = vely;
@@ -28,9 +30,9 @@ nuovay = posy + min(nuovavy,5);
 % disp(griglia);
 
 fprintf ('nuove coordinate sulla griglia: %d, %d',nuovax, nuovay);
-if griglia(nuovax, nuovay) == 0 % mi trovo sul circuito
+if grid(nuovax, nuovay) == 0 % mi trovo sul circuito
     r = -1;
-elseif griglia(nuovax,nuovay) == -1 || nuovax > 20 || nuovax < 0 ||nuovay >20 || nuovay < 0
+elseif grid(nuovax,nuovay) == -1 || nuovax > 20 || nuovax < 0 ||nuovay >20 || nuovay < 0
     % sono uscito dai bordi del circuito o dai confini della griglia
     r = -5; % perdo e devo ricominciare l'episodio
 else % mi trovo sulla linea del traguardo
@@ -42,7 +44,7 @@ end
 
 
 % per l'homework: assegno ai pixel una reward istantanea
-% sentiero: 0; traguardo: 1; ostacolo: -1
+% sentiero: -1; traguardo: 1; ostacolo: -8
 % scelgo una direzione e una accelerazione (1-5) casuale e mi muovo di
 % conseguenza; se esco torno al punto di partenza e creo l'associazione tra
 % lo stato e l'azione randomica presa, in modo tale da aggiornare la reward

@@ -1,0 +1,49 @@
+clear all
+close all
+clc
+
+% definizione della griglia da passare all'algoritmo
+
+gridsize = 20;
+
+grid = zeros (gridsize, gridsize);
+
+% griglia di partenza
+for p = 1:6
+    grid(gridsize,p) = 1;
+end
+
+% traguardo
+for t = 1:6
+    grid(t,gridsize) = 1;
+end
+
+
+% bordo dx
+for i = 11:gridsize
+    for j = 7:gridsize
+        grid(i,j) = -1;
+    end
+end
+for i = 12:gridsize
+    grid (10,i) = -1;
+end
+for i = 7:9
+    for j = 15:gridsize
+        grid (i,j) = -1;
+    end
+end
+
+% bordo sx
+for i = 3:6
+    for j = 1:4
+        grid(i,j) = -1;
+    end
+end
+for i = 1:2
+    for j = 1:10
+        grid(i,j) = -1;
+    end
+end
+
+save CircuitoMonteCarlo.mat gridsize grid
