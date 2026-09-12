@@ -2,72 +2,178 @@ clear all
 close all
 clc
 
+% ISTRUZIONI:
+% il main MonteCarloRace.m implementa l'algoritmo Monte Carlo per
+% far muovere una macchinina lungo il percorso dalla linea di partenza al
+% traguardo; il file CircuitoMonteCarlo.m rappresenta il percorso stesso e
+% in esso è possibile scegliere tra una griglia 20x20 e una griglia 36x36,
+% che hanno in comune la stessa posizione di partenza e di arrivo. Tramite 
+
 % accesso alla griglia
 load CircuitoMonteCarlo.mat % gridsize, grid
 
 % Ho due azioni simultanee
-a1 = [-1,0,1]; % accelerazioni (1=avanti, 0=fermo, -1=indietro)
-l1 = length(a1);
-a2 = [-1,0,1];
-l2 = length(a2);
-% RAPPRESENTAZIONE DEL PERCORSO
-% disp(grid);
-% fprintf("dimensione griglia: %d",gridsize);
-
-% for i = 1:numel(grid)
-%     if grid(i) == 1;
-%         fprintf ("elemento in posizione %d \n", i);
-%     end
-% end
+acc = [-1,0,1]; % accelerazioni (1=avanti, 0=fermo, -1=indietro
 
 % spazio degli stati: indice della posizione sulla griglia
 S = numel(grid); 
 
+% velocità massima consentita
+maxvel = 2;
+DimV = 2*maxvel+1;
+
 % matrice Q: tensore che associa a ogni posizione sulla griglia
+% e a ogni velocità lungo gli assi (var di stato)
 % il valore delle tre possibili accelerazioni
-Q = zeros(S,l1,l2);
+Q = zeros(S,DimV, DimV, length(acc), length(acc));
 
 % policy: assegna a ciascuno stato (righe) due valori per le azioni
-policy = randi([-1,1], [S,2]);
+policyX = randi(length(acc), S, DimV, DimV);
+policyY = randi(length(acc), S, DimV, DimV);
 
 % inizializzo i valori degli stati
-valinit = -ones(S, 1);
+% valinit = -ones(S, DimV, DimV);
 
-minvisits = 500;
+minvisits = 1e5;
 epsilon = 0.1;
-gamma = 1;
+gamma = 0.9;
 stepsize = 1e-3;
-tolerance = 8e-2;
+
+finished = false;
+
+% controllo il numero massimo di iterazioni per evitare di far 
+% impallare il while
+iter = 0;
+iterazioni = 2000;
 
 % accesso all'indice sulla griglia di partenza
 % s0 = sub2ind([gridsize,gridsize],gridsize,randi(6))
 
 % ALGORITMO MONTE CARLO
 
-while true
+%while true
 
     % Aggiorno il numero di volte che la tripla
     % stato s, azione a1 e azione a2 è stata visitata
-    N = zeros(S,l1,l2);
+    N = zeros(S, DimV, DimV,length(acc),length(acc));
 
-    while min (N(:)) < minvisits
+    for ep = 1:minvisits
+
         % episodio iniziale casuale: prendo un indice s0 sulla
         % linea di partenza e due azioni a10, a20 casuali
-        s0 = sub2ind([gridsize,gridsize],gridsize,randi(6))
-        a10 = randi(-1,1);
-        a20 = randi(-1,1);
+        % stato: 
+        s0 = sub2ind([gridsize,gridsize],gridsize,randi(6));
+        % per entrambi i percorsi proposti si parte dai primi 6 elementi
+        % dell'ultima riga e si arriva nei primi 6 elementi dell'ultima
+        % colonna
         vx0 = 0;
         vy0 = 0;
 
-        % chiamata della funzione racecar: passo 
-        % le velocità attuali, le accelerazioni e l'indice
-        % sulla griglia di partenza
-        [s1, vx, vy, r] = racecar(s0, vx0, vy0, a10, a20);
+        % Azioni iniziali (casuali)
+        % ax0 = randi([-1,1]);
+        % ay0 = randi([-1,1]);
+        ax0 = randi(length(acc));
+        ay0 = randi(length(acc));
+
+        statocorrente = [s0,vx0,vy0];
+
+        azionecorrente = [ax0,ay0];
+
+        % definizione dell'episodio che sarà costruito ad ogni iterazione
+        episodes = [];
+
+        iter = 0;
+        while iter < iterazioni %statocorrente(1) ~= -1
+
+            iter = iter + 1;
+            % chiamata della funzione racecar: passo 
+            % le velocità attuali, le accelerazioni e l'indice
+            % sulla griglia di partenza
+            [snew, vx, vy, r, finished] = racecar(statocorrente, azionecorrente, maxvel);
+            if finished 
+                episodes = [episodes; ...
+                    statocorrente(1),vx + maxvel + 1, vy + maxvel + 1, azionecorrente, r];
+                break;
+            end
+
+            % data la velocità restituita, ne estraggo l'indice
+            statocorrente = [snew, vx, vy];
+            if rand() < epsilon
+                azionecorrente = [randi(length(acc)),randi(length(acc))];
+            else
+                azionecorrente = ...
+                [policyX(statocorrente(1),vx + maxvel + 1, vy + maxvel + 1), ... 
+                policyY(statocorrente(1),vx + maxvel + 1, vy + maxvel + 1)];
+            end
+            
+            % in episodes metto gli indici e non i valori delle velocità
+            episodes = [episodes; ...
+                statocorrente(1),vx + maxvel + 1, vy + maxvel + 1, azionecorrente, r];
+
+          
+        end % while not terminale
+
+        % ho genenerato l'episodio
+        fprintf ("episodio numero %d \n", ep);
+
+        % reward cumulativa
+        G = 0;
+
+        T = size(episodes,1);
+
+        for t = T:-1:1
+            
+            % tripla posizione, veloctà x, velocità y
+            statot = episodes(t,1:3);
+            
+            % indice (posizione lineare al tempo t)
+            post = statot(1);
+            % velocità al tempo t
+            velXt = statot(2);
+            velyt = statot(3);
+
+            azionet = episodes(t,4:5);
+            rewardt = episodes(t,6);
+
+            G = gamma*G + rewardt;
+
+            % Aggiorno il numero di visite a ciascuna pentupla stato-azione
+            N(post, velXt, velyt, azionet(1), azionet(2)) = ...
+            N(post, velXt, velyt, azionet(1), azionet(2)) + 1;
+
+            % aggiornamento matrice Q
+            Q(post, velXt, velyt, azionet(1), azionet(2)) = ...
+                Q(post, velXt, velyt, azionet(1), azionet(2)) + ...
+                (1/N(post, velXt, velyt, azionet(1), azionet(2))) * ...
+                (G - Q(post, velXt, velyt, azionet(1), azionet(2)));
+
+            % aggiorniamo la policy con una funzione dedicata
+            [axottima, ayottima] = update (Q, statot);
+            policyX(post, velXt,velyt) = axottima;
+            policyY(post, velXt,velyt) = ayottima;
+
+        end % for Q, N
+
+        % rappresentazione del percorso ogni 10.000 episodi
+        if mod(ep, 10000) == 0
+            VisualizzaTraiettoria(policyX, policyY, grid, gridsize, maxvel, acc, ...
+                sprintf('Episodio %d di %d', ep, minvisits));
+        end
+        % N.B: può capitare che la macchinina passi attraverso l'ostacolo
+        % per poi tornare sul tracciato; è un bug raro che non danneggia
+        % l'esito dell'episodio. Si può assumere che la macchinina
+        % raggiunga lo stesso punto invertendo l'ordine con cui compie lo
+        % spostamento lungo x o lungo y, dal momento che l'esito sarà lo
+        % stesso.
 
 
     end % while minvisits
 
-end % while true
+%end % while true
+
+% Visualizzazione della traiettoria: eseguire VisualizzaTraiettoria.m
+% dopo aver finito di eseguire MonteCarloRace.m
+
 
 
 %

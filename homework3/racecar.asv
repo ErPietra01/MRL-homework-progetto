@@ -1,44 +1,64 @@
 % funzione che aggiorna lo stato in base alle decisioni dell'algoritmo
+% cosa fa la funzione?
+% la macchina riceve la griglia e la posizione corrente sulla griglia, le
+% velocità lungo gli assi, e l'azione (ovvero l'accelerazione scelta
+% lungo entrambi gli assi); in questo modo aggiorna la posizione sulla
+% griglia e valuta se può continuare o se ha perso
 
-function [next, reward, v] = racecar(s,a,vel, griglia, vcorrente)
-% seguendo la logica dell'algoritmo, la funzione viene utilizzata in ogni
-% stato per valutare la reward e lo stato successivo.
+% [snew, vx, vy, r] = racecar(statocorrente, azionecorrente);
+function [s, nuovavx, nuovavy, r, finished] = racecar(statocorrente, azionecorrente, maxvel)
+
+load CircuitoMonteCarlo.mat grid gridsize
+
+% variabili dello stato
+pos = statocorrente(1);
+vx = statocorrente(2);
+vy = statocorrente(3);
+
+accelerazioni = [-1,0,1];
+ax = accelerazioni(azionecorrente(1));
+ay = accelerazioni(azionecorrente(2));
+
+% spacchetto la velocità indicizzata
+[posx, posy] = ind2sub([gridsize, gridsize], pos);
+
+% aggiorno la velocità in entrambe le direzioni in base all'accelerazione
+% scelta
+nuovavx = max (-maxvel, min(vx + ax, maxvel)); 
+nuovavy = max (-maxvel, min(vy + ay, maxvel));
+% fprintf ('nuove velocità: vx = %d, vy = %d', nuovavx, nuovavy)
+
+% aggiorno la posizione sulla griglia in base a di quanto mi sposto grazie
+% alle nuove velocità
+nuovax = posx + min(nuovavx,maxvel);
+nuovay = posy + min(nuovavy,maxvel);
 
 
-% stato: posizione, accelerazione, direzione
-[ascissa, ordinata, velocita, direzione] = ind2sub([20,20,3,2], s);
-% in questo modo ora ho le coordinate, la velocità scelta e la direzione
+% fprintf ('nuove coordinate sulla griglia: %d, %d',nuovax, nuovay);
+if grid(nuovax,nuovay) == -1 || nuovax > gridsize || nuovax < 0 ||nuovay > gridsize || nuovay < 0
+    % sono uscito dai bordi del circuito o dai confini della griglia
+    % con s = -1 interrompo il while perché arrivo nello stato terminale
+    finished = true;
+    r = -1000; % perdo e devo ricominciare l'episodio
 
-% a seconda dell'asse
-% scelto, aggiorno la velocità e mi sposto lungo l'asse in avanti, indietro
-% o mi fermo se la velocità corrente è zero
+elseif grid(nuovax, nuovay) == 0 % mi trovo sul circuito
+    r = -1;
 
-if a == 1 % mi muovo lungo l'asse x 
-    vcorrente = vcorrente + velocita;
-    if abs (vcorrente) > 5
-        vcorrente = 5;
-    end
-    ascissa = ascissa + vcorrente;
-   
+else % mi trovo sulla linea del traguardo
+    r = 1000;
+    finished = true;
 
-elseif a == 2 % mi muovo lungo l'asse y
-    vcorrente = vcorrente + velocita;
-    if abs (vcorrente) > 5
-        vcorrente = 5;
-    end
-    ordinata = ordinata + vcorrente;
 end
 
-v = vcorrente;
-reward = 1;
- = sub2ind([20*20*3*2], ascissa, ordinata, velocita, direzione);
+s = sub2ind([gridsize,gridsize], nuovax, nuovay);
 
-end
 
+
+% 
 
 
 % per l'homework: assegno ai pixel una reward istantanea
-% sentiero: 0; traguardo: 1; ostacolo: -1
+% sentiero: -1; traguardo: 1; ostacolo: -8
 % scelgo una direzione e una accelerazione (1-5) casuale e mi muovo di
 % conseguenza; se esco torno al punto di partenza e creo l'associazione tra
 % lo stato e l'azione randomica presa, in modo tale da aggiornare la reward
