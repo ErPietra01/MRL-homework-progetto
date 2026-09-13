@@ -11,7 +11,7 @@ animato = true;    % true = disegna passo-passo, false = solo il risultato final
 pausastep = 0.05;  % secondi di pausa tra un passo e l'altro (solo se animato)
 maxstep = 300;     % limite di sicurezza per evitare loop infiniti
 
-
+% ---- punto di partenza casuale sulla linea di partenza --------------
 pos = sub2ind([gridsize, gridsize], gridsize, randi(6));
 vx = 0;
 vy = 0;
@@ -24,14 +24,14 @@ nstep = 1;
 finished = false;
 esito = 'incompleto (raggiunto il limite di passi)';
 
-% codice di colori per i possibili oggetti
-mappacolori = [0.85 0.2  0.2;   % ostacolo (rosso)
-               0.92 0.92 0.92;  % pista (grigia)
-               0.25 0.75 0.35]; % traguardo (verde)
-immagine = grid + 2; % -1,0,1 -> 1,2,3 (indicizzo le accelerazioni)
+% ---- preparo la mappa colorata del circuito --------------------------
+mappacolori = [0.85 0.2  0.2;   % ostacolo: rosso
+               0.92 0.92 0.92;  % pista: grigio chiaro
+               0.25 0.75 0.35]; % traguardo: verde
+immagine = grid + 2; % -1,0,1 -> 1,2,3 (indici validi per la colormap)
 
-% uso sempre la stessa figura senza doverne creare una nuova ad ogni
-% chiamata
+% riuso sempre la stessa figura invece di aprirne una nuova ogni volta,
+% utile se la chiami ripetutamente durante il training
 nomefigura = 'Traiettoria agente - Racecar Monte Carlo';
 fig = findobj('Type', 'figure', 'Name', nomefigura);
 if isempty(fig)
@@ -59,9 +59,13 @@ plot(gridsize*ones(1,6), 1:6, 's', 'MarkerSize', 10, ...
 hp = plot(c0, r0, '-o', 'LineWidth', 2, 'Color', [0.1 0.3 0.9], ...
     'MarkerFaceColor', [0.1 0.3 0.9], 'MarkerSize', 4);
 
+% ---- simulazione dell'episodio con policy greedy ----------------------
 while ~finished && nstep <= maxstep
 
-    pos_prec = pos; 
+    pos_prec = pos; % la tengo da parte: se l'episodio termina, racecar
+                     % restituisce una posizione fittizia (s = 1), quindi
+                     % ricostruisco a mano la cella (anche fuori griglia)
+                     % davvero raggiunta con quest'ultima mossa
 
     statocorrente = [pos, vx, vy];
     azionecorrente = [policyX(pos, vx + maxvel + 1, vy + maxvel + 1), ...

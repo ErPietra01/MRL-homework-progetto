@@ -57,6 +57,8 @@ elseif gridsize == 36
     grid (3:10,16:20) = -1;
     grid (13:20,1:14) = -1;
     grid (21:25,1:6) = -1;
+    % grid (21:24,7:11) = -1;
+    % grid (3:6,21:26) = -1;
 
     % bordo dx
     grid (29:gridsize,7:18) = -1;
@@ -65,6 +67,7 @@ elseif gridsize == 36
     grid (26:gridsize,19:27) = -1;
     grid (9:gridsize,28) = -1;
     grid (7:gridsize,29:gridsize) = -1;
+    % grid (18:25,17:20) = -1;
 
 end
 

@@ -66,6 +66,11 @@ for s = 2:S-1
         % e con probabilità tails finisco nello stato loss
     end
     
+    % stati non ammissibili: rimango nello stato attuale
+    if maxa < A
+        P(s,s,maxa+1:a) = 1;
+    end
+    
 end
 % nello stato in cui si vince (s = 100) o si perde (s = 0) l'agente rimane
 % nello stato con probabilità 1
