@@ -1,0 +1,40 @@
+Stato: quali caselle sono state scoperte e valore corrispondente
+-> 64 x 10 (numero da 0 a 8 + bandierina)
+
+per la rappresentazione sulla tabella Q conviene fare una suddivisione in features: in ogni iterazione
+considero uno degli stati possibili e ne studio solo i vicini -> l'algoritmo deve essere implementato 
+solo per aggiornare la Q dei vicini.
+
+azioni: rivela, flag
+
+matrice Q: dizionario che ha come chiave un vettore delle features e una azione e come valore il valore 
+della coppia vettore delle features - azione; tuple di features nuove hanno inizialmente valore 0 di default;
+dopodiché lo aggiorno in base all'azione che prendo
+
+in ogni iterazione: devo:
+- fare un check di tutti gli stati ammissibili;
+- calcolare la chiave (features-azione) per ciascuno stato ammissibile e per ciascuna azione;
+- scegliere la chiave col valore maggiore secondo una logica greedy.
+
+minesweeper_env è stato leggermente modificato per essere adattato al nostro caso di studio e per risolvere un
+leggero bug
+
+un problema di meno: c'è una sola azione possibile codificata nell'ambiente, ovvero scopri casella.
+Non ci sono le bandierine. Ciò significa che il dizionario avrà una dimensione di meno
+
+libreria pandas: data manipulation and analysis
+
+Abbiamo l'ambiente e alcune funzioni ausiliarie; bisogna implementare l'algoritmo, incluse Q, Eligibility
+Traces e l'aggiornamento dello stato.
+
+Riscriviamo le funzioni ausiliarie per comprenderle meglio
+
+env.reset alla fine dell'episodio per ottenere una nuova griglia casuale
+
+aggiornamento del dizionario: 
+Q[feature] = valore
+
+a ogni iterazione devo ricavarmi tutte le tuple e inizializzare il valore di quelle inedite:
+(il prossimo frammento non serve se usiamo defaultdict)
+if tupla not in Q:
+    Q[tupla] = 0
