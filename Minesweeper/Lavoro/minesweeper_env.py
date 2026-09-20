@@ -1,6 +1,14 @@
+'''code taken and adapted from:
+ https://github.com/jakejhansen/minesweeper_solver
+ FULL CREDIT TO THE ORIGINAL AUTHOR'''
+
+
 import random
 import numpy as np
 import pandas as pd
+
+# riga aggiunta per visualizzare la board in jupyter notebook
+from IPython.display import display
 
 class MinesweeperEnv(object):
     def __init__(self, width, height, n_mines,

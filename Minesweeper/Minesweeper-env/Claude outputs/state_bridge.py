@@ -7,9 +7,6 @@ costruire le feature/chiavi - la logica di E-SARSA (scelta epsilon-greedy,
 calcolo del valore atteso, aggiornamento di Q) la scrivi tu nel tuo main.
 """
 
-import pandas as pd
-
-
 def get_hidden_cells(env):
     """
     Restituisce la lista degli action_index ancora nascosti (celle 'U'),
@@ -19,39 +16,50 @@ def get_hidden_cells(env):
     return [i for i, t in enumerate(env.state) if t['value'] == 'U']
 
 
-def get_cell_neighbors_values(env, coord):
+def build_coord_lookup(env):
     """
-    Valori delle celle adiacenti a `coord`, letti da env.state (quello che
-    l'agente vede davvero) - MAI da env.grid o env.board, che contengono
-    la soluzione completa della partita.
+    Costruisce UNA VOLA SOLA per turno un dizionario coordinata -> valore,
+    a partire da env.state. Passalo poi a get_cell_neighbors_values per
+    ogni cella candidata, invece di ricostruire una struttura pandas ad
+    ogni singola chiamata: qui ogni lookup diventa O(1) invece di O(N).
+    """
+    return {t['coord']: t['value'] for t in env.state}
+
+
+def get_cell_neighbors_values(coord_lookup, coord, ncols, nrows):
+    """
+    Valori delle celle adiacenti a `coord`, letti dal dizionario
+    coord_lookup (costruito da env.state, cioe' quello che l'agente vede
+    davvero) - MAI da env.grid o env.board, che contengono la soluzione
+    completa della partita.
     """
     x, y = coord[0], coord[1]
-    state_df = pd.DataFrame(env.state)
 
     neighbors = []
     for col in range(y - 1, y + 2):
         for row in range(x - 1, x + 2):
             if ((x != row or y != col) and
-                    (0 <= col < env.ncols) and
-                    (0 <= row < env.nrows)):
-                idx = state_df.index[state_df['coord'] == (row, col)].tolist()[0]
-                neighbors.append(env.state[idx]['value'])
+                    (0 <= col < ncols) and
+                    (0 <= row < nrows)):
+                neighbors.append(coord_lookup[(row, col)])
 
     return neighbors
 
 
-def get_features(env, action_index):
+def get_features(env, action_index, coord_lookup):
     """
     Feature per la cella nascosta identificata da action_index, calcolate
-    a partire da env.state. Ricalcolo delle feature discusse in precedenza:
-    conteggio vicini nascosti, vincolo numerico piu' stringente tra i
-    vicini scoperti, categoria di posizione (angolo/bordo/interno).
+    a partire da coord_lookup (vedi build_coord_lookup - costruiscilo una
+    volta per turno, prima di valutare tutte le celle candidate).
+    Ricalcolo delle feature discusse in precedenza: conteggio vicini
+    nascosti, vincolo numerico piu' stringente tra i vicini scoperti,
+    categoria di posizione (angolo/bordo/interno).
 
     Nota: qui non c'e' un conteggio "flagged_neighbors", perche' questo
     ambiente non ha un'azione di contrassegno - solo "rivela".
     """
     coord = env.state[action_index]['coord']
-    neighbor_values = get_cell_neighbors_values(env, coord)
+    neighbor_values = get_cell_neighbors_values(coord_lookup, coord, env.ncols, env.nrows)
 
     hidden_count = sum(1 for v in neighbor_values if v == 'U')
     revealed_numbers = [v for v in neighbor_values if v != 'U']

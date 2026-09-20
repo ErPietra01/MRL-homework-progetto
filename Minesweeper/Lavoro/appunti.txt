@@ -38,3 +38,96 @@ a ogni iterazione devo ricavarmi tutte le tuple e inizializzare il valore di que
 (il prossimo frammento non serve se usiamo defaultdict)
 if tupla not in Q:
     Q[tupla] = 0
+
+
+    Q = defaultdict(float)
+
+    feature 1 = [angolo, 2] # sto in un angolo, ho 2 bombe vicine
+
+    Q = {[angolo, 2] : 0}
+
+    #aggiorniamo il valore di queste features
+
+    Q = {[angolo, 2] : 3}
+
+    feature 2 = [centro, 3]
+
+    Q = {[angolo, 2] : 3,
+    [centro, 3] : 0}
+
+
+A ogni turno:
+    - calcolo le features per ogni cella candidata
+    - scelgo con epsilon greedy la cella da scoprire confrontando i valori delle features s in Q
+    - invio tramite step le coordinate della cella scelta all'ambiente
+    - l'ambiente restituisce una reward e lo stato successivo
+    - ricalcolo le features s' per le celle candidate nel nuovo stato
+    - aggiorno il valore della tupla di features s scelte
+    - passo allo stato successivo 
+
+azione = quale cella rivelare
+
+
+ISTRUZIONI PER L'AMBIENTE E PER LE FUNZIONI AUSILIARIE
+
+MinesweeperEnv: chiamato una volta sola all'inizio del programma per creare la griglia
+reset(): nessun argomento o return; serve a ottenere una nuova disposizione delle mine all'inizio di ciascun
+episodio
+env.step(action_index): prende l'indice della cella e restituisce la reward e se l'episodio è finito
+env.state: lista di dizionari che assegna un valore a ciascuna casella (1-8 + B + H + U)
+TUTTI GLI ALTRI NON VANNO TOCCATI
+
+get_hidden_cells(env): da usare una sola volta prima della selezione dello stato. Permette
+di ottenere una lista aggiornata delle caselle ancora nascoste
+build_coord_lookup(env): via di mezzo tra Q e le coordinate; calcola il valore di ciascuna cella
+get_cell_neighbors_values: presa una coordinata, restituisce la lista dei valori dei vicini
+get_features: da usare per ogni cella candidata; restituisce la tupla delle features
+features_to_key: restituisce la tupla come chiave di Q
+detect_actually_revealed: seve solo nel controllo iniziale 
+
+azione greedy: scelgo la cella relativa al valore più alto delle features, oppure una 
+cella a caso tra quelle disponibili (ma solo dopo la prima mossa casuale)
+
+
+SEQUENZA DELL'USO DELLE FUNZIONI AUSILIARIE:
+hidden = get_hidden_cells(env)
+coord_lookup = build_coord_lookup(env)
+
+candidates = []
+for idx in hidden:
+    features = get_features(env, idx, coord_lookup)
+    key = features_to_key(features)
+    candidates.append((key, idx))
+
+# epsilon-greedy su candidates, usando Q.get(key, 0.0) per ciascuno
+# ... (questa parte la scrivi tu, e' il cuore del tuo E-SARSA)
+
+action_index = ...  # scelto sopra
+
+state_before = [dict(t) for t in env.state] if env.n_clicks == 0 else None
+_, reward, done = env.step(action_index)
+
+if state_before is not None:
+    changed = detect_actually_revealed(state_before, env.state)
+    # se necessario, usa 'changed' per capire quale cella e' stata
+    # davvero rivelata al posto di action_index (redirect prima mossa)
+
+
+
+if random.random() < epsilon:
+    action_index = random.choice(hidden_cells)          # esplorazione
+else:
+    action_index = max(candidates, key=lambda c: Q.get(c[0], 0.0))[1]  # sfruttamento
+
+_, reward, done = env.step(action_index)
+
+    hidden = get_hidden_cells(env)
+coord_lookup = build_coord_lookup(env)
+
+candidates = []
+for idx in hidden:
+    features = get_features(env, idx, coord_lookup)
+    key = features_to_key(features)
+    candidates.append((key, idx))
+
+#
