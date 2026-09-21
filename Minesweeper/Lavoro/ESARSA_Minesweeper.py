@@ -26,6 +26,7 @@ numepisodes = 100_000
 gamma = 0.9
 alpha = 0.01
 epsilon = 0.1
+totrew = np.zeros(numepisodes)
 
 # Dizionario Q con chiave = vettore delle features + azione e valore = valore della coppia stato-azione
 # nota: l'azione è solo "rivela", di conseguenza la chiave sarà il solo vettore delle features
@@ -46,8 +47,9 @@ for e in range(numepisodes):
     
     # step con l'azione casuale: primo aggiornamento dello stato
     _, rew, done = ambiente.step(index)
-    if done == True:
-        continue
+    featinit = sb.get_features(ambiente, index, sb.build_coord_lookup(ambiente))
+    primachiave = sb.features_to_key(featinit)
+    _, reward, done = ambiente.step(index)
 
     # comincia l'iterazione che terminerà quando l'agente finirà in uno stato terminale
     while done == False:
@@ -55,7 +57,7 @@ for e in range(numepisodes):
         '''con get_hidden_cells ottengo la lista degli indici delle celle nascoste'''
         nascoste = sb.get_hidden_cells(ambiente)
         '''state crea una lista di dizionari: con lookup costruisco invece un singolo
-        dizionario per fare tutte le operazioni successive'''
+        dizionario coordinata:valore per fare tutte le operazioni successive'''
         lookup = sb.build_coord_lookup(ambiente)
 
         '''ora popolo una lista di candidati, ovvero di associazioni tra cella e vettore delle features'''
@@ -67,6 +69,55 @@ for e in range(numepisodes):
             features = sb.get_features(ambiente, cella, lookup)
             key = sb.features_to_key(features)
             candidate.append((key, cella))
+
+        '''A questo punto ho la lista delle celle candidate e la rispettiva tupla delle features
+        -> posso implementare la logica epsilon greedy per popolare Q scegliendo la cella (indice)
+        con valore maggiore oppure una qualunque tra le candidate'''
+        action = None # indice della cella scelta
+        bestkey = None # chiave scelta in base alla policy greedy
+        bestvalue = None # valore associato alla chiave migliore
+
+        if random.random() < epsilon:
+            # azione casuale: scelgo un indice casuale tra le celle ancora nascoste
+            action = random.choice(nascoste)
+            scelta = sb.get_features(ambiente, action, lookup)
+            bestkey = sb.features_to_key(scelta)
+        else: 
+            #azione greedy: scansiono le coppie chiave-indice in candidateS
+            for key, cella in candidate:
+                valore = Q.get(key, 0.0)
+                if bestvalue is None or valore > bestvalue:
+                    action = cella
+                    bestkey = key
+
+
+        '''Ora passo l'indice a step per aggiornare la griglia, ottenere la reward istantanea,
+        verificare se mi trovo in uno stato terminale e aggiornare il valore delle features in Q'''
+
+        _, reward, done = ambiente.step (action)
+        totrew[e] += reward
+
+        '''devo calcolare il valore atteso delle prossime azioni; l'ambiente è
+            stato già aggiornato da step e ora devo valutare il prossimo stato, ovvero
+            la nuova griglia ottenuta dopo l'azione'''
+        
+        prossime = sb.get_hidden_cells(ambiente)
+        prossimalookup = sb.build_coord_lookup(ambiente)
+        
+        prossimivalori = []
+
+        if done == True:
+            Q[bestkey] += alpha * (reward + gamma *0 - Q[bestkey])
+
+        elif done == False:
+
+            for n in prossime:
+                prossimafeat = sb.get_features(ambiente, n, prossimalookup)
+                prossimachiave = sb.features_to_key(prossimafeat)
+                prossimivalori[n] = Q.get (prossimachiave)
+
+            expectedvalue = (1-epsilon) * np.max(Q.values()) + epsilon * np.sum(Q.values())
+            Q[bestkey] += alpha * (reward + gamma * expectedvalue - Q[bestkey])
       
 
 

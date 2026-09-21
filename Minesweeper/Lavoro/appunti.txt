@@ -130,4 +130,14 @@ for idx in hidden:
     key = features_to_key(features)
     candidates.append((key, idx))
 
+    best_value = max(Q.get(c[0], 0.0) for c in candidates)
+best_candidates = [c for c in candidates if Q.get(c[0], 0.0) == best_value]
+action_index = random.choice(best_candidates)[1]
+
+for key, idx in candidates:
+    value = Q.get(key, 0.0)
+    if best_value is None or value > best_value:
+        best_value = value
+        action_index = idx
+
 #
