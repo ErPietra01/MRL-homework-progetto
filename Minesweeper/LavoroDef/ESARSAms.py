@@ -41,6 +41,11 @@ for e in num_episodes:
     '''esprimo le coordinate come indice lineare'''
     index0 = np.ravel_multi_index((x0,y0),(Xenv,Yenv))
 
+    '''ora devo valutare la prima mossa casuale: faccio un passo dell'algoritmo'''
+
+    # features della cella:
+    
+
     
 
 
