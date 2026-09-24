@@ -20,7 +20,7 @@ def lista_dict (ambiente):
     '''funzione che smonta la lista di dizionari e crea
     un unico dizionario coordinate:valore'''
     listadict = {}
-    for i in ambiente.state:
+    for i in ambiente.state: #for i in range(ambiente.state):
         listadict[i['coord']] = i['value']
     return listadict
 
@@ -47,7 +47,7 @@ def posizione (vicini):
         pos = "angolo"
     elif num_vicini == 5:
         pos = "bordo"
-    else:
+    else: #elif num_vicini == 8: pos = "centrale" else return fail
         pos = "centrale"
     return pos
 
@@ -61,7 +61,7 @@ def genera_features (ambiente, a, listadict):
     #valori dei vicini:
     valvicini = valori_vicini(listadict,coord,ambiente.nrows, ambiente.ncols)
 
-    # popsizione sulla griglia:
+    # posizione sulla griglia:
     pos = posizione(valvicini)
 
     '''features: quante celle sono nascoste, quante celle sono rivelate, e posizione indicativa'''
