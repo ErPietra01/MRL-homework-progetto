@@ -1,7 +1,10 @@
 from collections import defaultdict
 '''In questo file sono presenti alcune funzioni ausiliarie
 per far comunicare il main con l'ambiente e per facilitare
-l'utilizzo di Q come dizionario'''
+l'utilizzo di Q come dizionario
+L'ambiente usa principalmente un indice, ma per la valutazione delle features 
+è più comodo usare le coordinate, motivo per cui utilizziamo entrambe
+'''
 
 def celle_nascoste (ambiente):
     nascoste = []
@@ -24,7 +27,7 @@ def lista_dict (ambiente):
         listadict[i['coord']] = i['value']
     return listadict
 
-def valori_vicini (lookup, coordinate, Xenv, Yenv):
+def valori_vicini (listadict, coordinate, Xenv, Yenv):
     '''funzione che valuta il valore [0-8 + U], rispettando 
     le dimensioni della griglia e non contando la cella stessa
     (qui conviene lavorare per coordinate per un controllo 
@@ -35,7 +38,7 @@ def valori_vicini (lookup, coordinate, Xenv, Yenv):
     for i in range (y-1, y+2):
         for j in range (x-1,x+2):
             if (x != j or y != i) and (0<= i < Yenv) and (0 <= j < Xenv):
-                vicini.append (lookup[(j,i)])
+                vicini.append (listadict[(j,i)])
     return vicini
 
 def posizione (vicini):
@@ -64,7 +67,7 @@ def genera_features (ambiente, a, listadict):
     # popsizione sulla griglia:
     pos = posizione(valvicini)
 
-    '''features: quante celle sono nascoste, quante celle sono rivelate, e posizione indicativa'''
+    '''features: quante celle sono nascoste posizione indicativa e livello di rischio'''
     nascoste = 0
     '''controllo di sicurezza: se il valore più basso delle celle vicine è
         minore o uguale a 3, allora le celle sono meno rischiose, altrimenti ci sono 
