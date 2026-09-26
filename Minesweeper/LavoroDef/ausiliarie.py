@@ -1,4 +1,5 @@
 from collections import defaultdict
+import numpy as np
 '''In questo file sono presenti alcune funzioni ausiliarie
 per far comunicare il main con l'ambiente e per facilitare
 l'utilizzo di Q come dizionario
@@ -54,7 +55,7 @@ def posizione (vicini):
         pos = "centrale"
     return pos
 
-def genera_features (ambiente, a, listadict):
+def genera_features (ambiente, a, listadict, proporzione):
     '''Questa funzione genera la tupla delle features in base
     ai valori vicini e alla posizione approssimativa sulla griglia
     (quindi non le coordinate esatte)'''
@@ -63,6 +64,18 @@ def genera_features (ambiente, a, listadict):
     coord = ambiente.state[a]['coord']
     #valori dei vicini:
     valvicini = valori_vicini(listadict,coord,ambiente.nrows, ambiente.ncols)
+
+    numerivicini = []
+    for i in valvicini:
+        if i != 'U':
+            numerivicini.append(i)
+
+    if len (numerivicini) > 0:
+        minvicini = min (numerivicini)
+        maxvicini = max (numerivicini)
+    else:
+        minvicini = 0
+        maxvicini = 0
 
     # popsizione sulla griglia:
     pos = posizione(valvicini)
@@ -90,8 +103,17 @@ def genera_features (ambiente, a, listadict):
     else:
         rischio = 1
 
-    '''fornisco le features come tupla dei tre valori calcolati'''
-    features = (nascoste, pos, rischio)
+    prop = None
+    '''valore indicativo della proporzione di bombe rimaste'''
+    if proporzione < 0.33:
+        prop = 'bassa'
+    elif 0.33 <= proporzione <= 0.66:
+        prop = 'media'
+    else:
+        prop = 'alta'
+
+    '''fornisco le features come tupla dei 6 valori calcolati'''
+    features = (nascoste, pos, rischio, prop, minvicini, maxvicini)
 
     '''features = defaultdict(float)
     features["nascoste"] = nascoste
