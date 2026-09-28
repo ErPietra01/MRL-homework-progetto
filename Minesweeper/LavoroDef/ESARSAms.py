@@ -11,12 +11,12 @@ import ausiliarie as aux
 
 '''----------parametri dell'algoritmo E-SARSA----------'''
 
-num_episodes = 100_000
+num_episodes = 150_000
 alpha = 0.01
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
-decay_rate = 5 / num_episodes
+decay = 5 / num_episodes
 gamma = 0.9
 
 '''----------inizializzazione dell'ambiente----------'''
@@ -24,7 +24,12 @@ gamma = 0.9
 from minesweeper_env import MinesweeperEnv
 Xenv = 4
 Yenv = 4
-bombe = 3
+'''percentuale di bombe in base alla difficoltà:
+facile: circa 12%
+medio: circa 16%
+difficile: circa 20%
+'''
+bombe = 2
 ambiente = MinesweeperEnv(width = Xenv, height = Yenv, n_mines = bombe)
 
 '''----------conteggi----------'''
@@ -42,7 +47,7 @@ Q = defaultdict(float)
 
 for e in range(num_episodes):
 
-    epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay_rate * e)
+    epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
 
     '''rappresentazione grafica dell'andamento dell'algoritmo ogni 10.000 episodi'''
     mostra = (e % 10000 == 0) or (e == num_episodes - 1)
@@ -147,7 +152,7 @@ for e in range(num_episodes):
         '''Iterazione epsilon-greedy'''
 
         if done: #ambiente.state[index0]['value'] == 'B':
-            '''sconfitta: aggiorno la griglia con step e salvo done = True'''
+            '''vittoria o sconfitta: aggiorno la griglia con step e salvo done = True'''
             Q[features] += alpha * (reward + gamma * 0 - Q[features])
 
         else:
@@ -229,6 +234,7 @@ for e in range(num_episodes):
             plt.savefig(f'winrate_cumulativo_ep{e}.png')
             plt.close()
 
+        
 
 
 '''----------sezione----------'''

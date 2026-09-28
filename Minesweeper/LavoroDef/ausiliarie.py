@@ -88,17 +88,20 @@ def genera_features (ambiente, a, listadict, proporzione):
         la sconfitta con probabilità maggiore'''
     sicure = 0
     rischiose = 0
+    occupate = 0
     for i in valvicini:
         if i == 'U':
             nascoste += 1
         else:
+            occupate += 1
+        '''else:
             if i >=3:
                 rischiose += 1
             else:
-                sicure += 1
+                sicure += 1'''
 
     rischio = None
-    if rischiose >= sicure:
+    if  occupate < 3: #rischiose >= sicure:
         rischio = 0
     else:
         rischio = 1
