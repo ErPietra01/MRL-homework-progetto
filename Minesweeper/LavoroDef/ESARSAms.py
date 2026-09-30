@@ -75,7 +75,7 @@ for e in range(num_episodes):
     quantenascoste0 = len(nascoste0)
 
     '''features della cella in esame'''
-    features = aux.genera_features(ambiente, index0, listadict, bombe/quantenascoste0)
+    features = aux.genera_features(ambiente, index0, listadict, bombe/quantenascoste0, bombe)
 
     done = None
 
@@ -114,7 +114,7 @@ for e in range(num_episodes):
             bestvalue = None
             indicebestvalue = None
             for i in nascoste:
-                proxfeat = aux.genera_features(ambiente, i, proxlistadict, bombe/quantenascoste)
+                proxfeat = aux.genera_features(ambiente, i, proxlistadict, bombe/quantenascoste, bombe)
                 valorefeat = Q.get(proxfeat,0.0)
                 prossime.append(valorefeat)
                 if bestvalue is None or valorefeat > bestvalue:
@@ -138,7 +138,7 @@ for e in range(num_episodes):
         quantenascoste = len(nascoste)
 
         '''features della cella in esame'''
-        features = aux.genera_features(ambiente, index, listadict, bombe/quantenascoste)
+        features = aux.genera_features(ambiente, index, listadict, bombe/quantenascoste, bombe)
 
         _, reward, done = ambiente.step(index)
 
@@ -177,7 +177,7 @@ for e in range(num_episodes):
                 bestvalue = None
                 indicebestvalue = None
                 for i in nascoste:
-                    proxfeat = aux.genera_features(ambiente, i, proxlistadict, bombe/quantenascoste)
+                    proxfeat = aux.genera_features(ambiente, i, proxlistadict, bombe/quantenascoste, bombe)
                     valorefeat = Q.get(proxfeat,0.0)
                     prossime.append(valorefeat)
                     if bestvalue is None or valorefeat > bestvalue:

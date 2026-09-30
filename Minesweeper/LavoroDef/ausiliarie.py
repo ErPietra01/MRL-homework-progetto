@@ -55,7 +55,7 @@ def posizione (vicini):
         pos = "centrale"
     return pos
 
-def genera_features (ambiente, a, listadict, proporzione):
+def genera_features (ambiente, a, listadict, proporzione, bombe):
     '''Questa funzione genera la tupla delle features in base
     ai valori vicini e alla posizione approssimativa sulla griglia
     (quindi non le coordinate esatte)'''
@@ -115,8 +115,12 @@ def genera_features (ambiente, a, listadict, proporzione):
     else:
         prop = 'alta'
 
-    '''fornisco le features come tupla dei 6 valori calcolati'''
-    features = (nascoste, pos, rischio, prop, minvicini, maxvicini)
+    '''Restituisco le features in base a quanto è grande la griglia'''
+    if bombe <= 3:
+        '''fornisco le features come tupla dei 6 valori calcolati'''
+        features = (nascoste, pos, rischio, prop, minvicini, maxvicini)
+    else: 
+        features = (nascoste, pos, rischio)
 
     '''features = defaultdict(float)
     features["nascoste"] = nascoste
