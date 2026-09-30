@@ -22,14 +22,14 @@ gamma = 0.9
 '''----------inizializzazione dell'ambiente----------'''
 
 from minesweeper_env import MinesweeperEnv
-Xenv = 4
-Yenv = 4
+Xenv = 8
+Yenv = 8
 '''percentuale di bombe in base alla difficoltà:
 facile: circa 12%
 medio: circa 16%
 difficile: circa 20%
 '''
-bombe = 2
+bombe = 8
 ambiente = MinesweeperEnv(width = Xenv, height = Yenv, n_mines = bombe)
 
 '''----------conteggi----------'''
