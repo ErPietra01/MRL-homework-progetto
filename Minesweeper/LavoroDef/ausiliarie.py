@@ -1,4 +1,4 @@
-from collections import defaultdict
+# from collections import defaultdict
 import numpy as np
 '''In questo file sono presenti alcune funzioni ausiliarie
 per far comunicare il main con l'ambiente e per facilitare
@@ -127,6 +127,30 @@ def genera_features (ambiente, a, listadict, proporzione, bombe):
     features["posizione"] = pos
     features["rischio"] = rischio'''
 
+    return features
+
+
+def featuresver2 (ambiente, a, listadict):
+    '''funzione che genera un vettore con il conteggio
+    dei possibili valori (U, 1-8) delle celle vicine'''
+    coord = ambiente.state[a]['coord']
+    #valori dei vicini:
+    valvicini = valori_vicini(listadict,coord,ambiente.nrows, ambiente.ncols)
+
+    features = np.zeros(11)
+    '''Termine di bias'''
+    features[10] = 1
+
+    '''for che aggiorna il conteggio per le celle nascoste e per le celle
+    con un numero sopra nell'intorno della cella in esame.'''
+    for i in valvicini:
+        if i == 'U':
+            features[9]+=1
+        else:
+            features[i] += 1
+            '''vicini_squared = valori_vicini(listadict)
+            Implementare feature aggiuntiva con il check delle vicine delle celle scoperte'''
+    
     return features
 
 
