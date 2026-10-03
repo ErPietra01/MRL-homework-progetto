@@ -22,8 +22,8 @@ gamma = 0.9
 '''----------inizializzazione dell'ambiente----------'''
 
 from minesweeper_env import MinesweeperEnv
-Xenv = 8
-Yenv = 8
+Xenv = 4
+Yenv = 4
 '''percentuale di bombe in base alla difficoltà:
 facile: circa 12%
 medio: circa 16%
@@ -46,7 +46,8 @@ Q = defaultdict(float)'''
 '''Vettore dei valori dei numeri sulle celle (U, 0-8); questa è la struttura che verrà aggiornata
 ad ogni passo.
 Stiamo sostanzialmente creando un approssimatore lineare aggiornato tramite E-SARSA!'''
-w = np.zeros(11)
+w = np.zeros(12)
+# w = np.random.rand(12)
 
 '''----------Algoritmo E-SARSA----------'''
 
@@ -154,8 +155,6 @@ for e in range(num_episodes):
         nascoste = aux.celle_nascoste(ambiente)
         # quantenascoste = len(nascoste)
 
-        '''features della cella in esame
-        features = aux.genera_features(ambiente, index, listadict, bombe/quantenascoste, bombe)'''
         x = aux.featuresver2 (ambiente, index, listadict)
         Q = np.dot(w,x)
 
@@ -170,9 +169,7 @@ for e in range(num_episodes):
 
         '''Iterazione epsilon-greedy'''
 
-        if done: #ambiente.state[index0]['value'] == 'B':
-            '''vittoria o sconfitta: aggiorno la griglia con step e salvo done = True
-            Q[features] += alpha * (reward + gamma * 0 - Q[features])'''
+        if done:
 
             w += alpha * (reward + gamma * 0 - Q) * x
 
@@ -188,18 +185,12 @@ for e in range(num_episodes):
             '''Aggiorno il dizionario coordinate:valore a seguito di step'''
             proxlistadict = aux.lista_dict(ambiente)
 
-            '''nuovo vettore x e prodotto per Regressione Lineare'''
-            '''x = aux.featuresver2(ambiente, index, proxlistadict)'''
-            # Q = np.dot(w,x)
 
             '''creo una lista dei valori delle prossime celle (per il valore atteso)'''
             prossime = []
             bestvalue = None
             indicebestvalue = None
             for i in nascoste:
-                '''proxfeat = aux.genera_features(ambiente, i, proxlistadict, bombe/quantenascoste, bombe)
-                valorefeat = Q.get(proxfeat,0.0)'''
-            
                 x_next = aux.featuresver2 (ambiente, i, proxlistadict)
                 valorefeat = np.dot(w,x_next)
                 prossime.append(valorefeat)
@@ -209,9 +200,6 @@ for e in range(num_episodes):
             
             
             valoreatteso = (1-epsilon) * bestvalue + epsilon* (sum (prossime) / len (prossime))
-            '''Q[features] += alpha * (reward + gamma * valoreatteso - Q[features])'''
-            '''x = aux.featuresver2 (ambiente, index, proxlistadict)'''
-            # Q = np.dot(w,x)
             w += alpha * (reward + gamma * valoreatteso - Q) * x
 
             '''epsilon greedy'''
@@ -220,7 +208,6 @@ for e in range(num_episodes):
             else:
                 index = indicebestvalue
 
-            # del proxlistadict (non libera memoria, anzi è potenzialmente dannoso)
 
     
     '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi'''

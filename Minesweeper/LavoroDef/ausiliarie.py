@@ -132,14 +132,15 @@ def genera_features (ambiente, a, listadict, proporzione, bombe):
 
 def featuresver2 (ambiente, a, listadict):
     '''funzione che genera un vettore con il conteggio
-    dei possibili valori (U, 1-8) delle celle vicine'''
+    dei possibili valori (U, 0-8) delle celle vicine'''
     coord = ambiente.state[a]['coord']
     #valori dei vicini:
     valvicini = valori_vicini(listadict,coord,ambiente.nrows, ambiente.ncols)
 
-    features = np.zeros(11)
+    features = np.zeros(12)
     '''Termine di bias'''
     features[10] = 1
+
 
     '''for che aggiorna il conteggio per le celle nascoste e per le celle
     con un numero sopra nell'intorno della cella in esame.'''
@@ -148,11 +149,38 @@ def featuresver2 (ambiente, a, listadict):
             features[9]+=1
         else:
             features[i] += 1
-            '''vicini_squared = valori_vicini(listadict)
-            Implementare feature aggiuntiva con il check delle vicine delle celle scoperte'''
-    
+           
+
+    '''feature di deduzione: è un contatore che, per ogni cella scoperta nell'intorno,
+    calcola quante celle coperte ha intorno; se tale numero è pari al numero sopra la cella,
+    allora incremento il contatore'''
+    deduzione = 0
+
+    '''Funzione di deduzione'''
+
+    '''coordinate della cella in esame'''
+    x = coord[0]
+    y = coord[1]
+
+    '''dimensioni dell'ambiente per non uscire dai confini'''
+    Xenv = ambiente.nrows
+    Yenv = ambiente.ncols
+
+    for i in range (y-1, y+2):
+        for j in range (x-1,x+2):
+            if (x != j or y != i) and (0<= i < Yenv) and (0 <= j < Xenv) and listadict[(j,i)] != 'U':
+                xVicina = j
+                yVicina = i
+                coord2 = (xVicina, yVicina)
+                '''valore 0-8,U della cella vicina in esame'''
+                valsquared = listadict[(xVicina, yVicina)]
+                vicinisquared = valori_vicini (listadict,coord2, Xenv, Yenv)
+                if vicinisquared.count('U') == valsquared:
+                    deduzione += 1
+
+    features[11] = deduzione
     return features
 
-
+'''funzione di ragionamento: ciclo sulle celle vicine tramite coord e state'''
 
 #
