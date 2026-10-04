@@ -49,7 +49,7 @@ Q = defaultdict(float)'''
 '''Vettore dei valori dei numeri sulle celle (U, 0-8); questa è la struttura che verrà aggiornata
 ad ogni passo.
 Stiamo sostanzialmente creando un approssimatore lineare aggiornato tramite E-SARSA!'''
-w = np.zeros(18)
+w = np.zeros(15)
 # w = np.random.rand(12)
 
 '''----------Algoritmo E-SARSA----------'''

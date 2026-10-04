@@ -130,14 +130,14 @@ def genera_features (ambiente, a, listadict, proporzione, bombe):
     return features
 
 
-def featuresver2 (ambiente, a, listadict):
+def featuresver2 (ambiente, a, listadict, proporzione, bombe):
     '''funzione che genera un vettore con il conteggio
     dei possibili valori (U, 0-8) delle celle vicine'''
     coord = ambiente.state[a]['coord']
     #valori dei vicini:
     valvicini = valori_vicini(listadict,coord,ambiente.nrows, ambiente.ncols)
 
-    features = np.zeros(12)
+    features = np.zeros(18)
     '''Termine di bias'''
     features[10] = 1
 
@@ -150,7 +150,7 @@ def featuresver2 (ambiente, a, listadict):
         else:
             features[i] += 1
            
-
+    
     '''feature di deduzione: è un contatore che, per ogni cella scoperta nell'intorno,
     calcola quante celle coperte ha intorno; se tale numero è pari al numero sopra la cella,
     allora incremento il contatore'''
@@ -179,6 +179,55 @@ def featuresver2 (ambiente, a, listadict):
                     deduzione += 1
 
     features[11] = deduzione
+
+    '''features presenti anche nella versione precedente:'''
+    nascoste = 0
+    occupate = 0
+    for i in valvicini:
+        if i == 'U':
+            nascoste += 1
+        else:
+            occupate += 1
+            
+        rischio = None
+        if  occupate/len(valvicini) < 0.33: #rischiose >= sicure:
+            rischio = 0
+        else:
+            rischio = 1
+
+    features[12] = rischio
+
+    prop = None
+    '''valore indicativo della proporzione di bombe rimaste'''
+    if proporzione < 0.33:
+        prop = 0
+    elif 0.33 <= proporzione <= 0.66:
+        prop = 1
+    else:
+        prop = 2
+
+    features[13] = prop
+
+    features[14] = features[9]/len(valvicini)
+
+    pos = posizione(valvicini)
+    if pos == "angolo":
+        features[15] = 0
+    elif pos == "bordo":
+        features[15] = 1
+    else:
+        features[15] = 2
+
+    hidden = celle_nascoste(ambiente)
+    features[16] = len(hidden) /len(ambiente.state)
+
+    sx = x/(Xenv-1)
+    dx = (Xenv-1-x)/(Xenv-1)
+    up = y/(Yenv-1)
+    down = (Yenv-1-y)/(Yenv-1)
+    pos = min(sx,dx,up,down)
+    features[17] = pos
+
     return features
 
 '''funzione di ragionamento: ciclo sulle celle vicine tramite coord e state'''
