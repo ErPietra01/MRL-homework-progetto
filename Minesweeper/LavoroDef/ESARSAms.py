@@ -16,8 +16,8 @@ alpha = 0.001
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
-decay = 20 / num_episodes
-gamma = 0.9
+decay = 50 / num_episodes #20
+gamma = 0.3 #0.9
 
 '''implementazione TD(lambda)'''
 l = 0.9

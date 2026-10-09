@@ -55,80 +55,6 @@ def posizione (vicini):
         pos = "centrale"
     return pos
 
-def genera_features (ambiente, a, listadict, proporzione, bombe):
-    '''Questa funzione genera la tupla delle features in base
-    ai valori vicini e alla posizione approssimativa sulla griglia
-    (quindi non le coordinate esatte)'''
-
-    # posizione sulla griglia: conversione da indice a coordinate
-    coord = ambiente.state[a]['coord']
-    #valori dei vicini:
-    valvicini = valori_vicini(listadict,coord,ambiente.nrows, ambiente.ncols)
-
-    numerivicini = []
-    for i in valvicini:
-        if i != 'U':
-            numerivicini.append(i)
-
-    if len (numerivicini) > 0:
-        minvicini = min (numerivicini)
-        maxvicini = max (numerivicini)
-    else:
-        minvicini = 0
-        maxvicini = 0
-
-    # popsizione sulla griglia:
-    pos = posizione(valvicini)
-
-    '''features: quante celle sono nascoste posizione indicativa e livello di rischio'''
-    nascoste = 0
-    '''controllo di sicurezza: se il valore più basso delle celle vicine è
-        minore o uguale a 3, allora le celle sono meno rischiose, altrimenti ci sono 
-        molte bombe intorno e liberare celle in prossimità potrebbe comportare
-        la sconfitta con probabilità maggiore'''
-    sicure = 0
-    rischiose = 0
-    occupate = 0
-    for i in valvicini:
-        if i == 'U':
-            nascoste += 1
-        else:
-            occupate += 1
-        '''else:
-            if i >=3:
-                rischiose += 1
-            else:
-                sicure += 1'''
-
-    rischio = None
-    if  occupate < 3: #rischiose >= sicure:
-        rischio = 0
-    else:
-        rischio = 1
-
-    prop = None
-    '''valore indicativo della proporzione di bombe rimaste'''
-    if proporzione < 0.33:
-        prop = 'bassa'
-    elif 0.33 <= proporzione <= 0.66:
-        prop = 'media'
-    else:
-        prop = 'alta'
-
-    '''Restituisco le features in base a quanto è grande la griglia'''
-    if bombe <= 3:
-        '''fornisco le features come tupla dei 6 valori calcolati'''
-        features = (nascoste, pos, rischio, prop, minvicini, maxvicini)
-    else: 
-        features = (nascoste, pos, rischio)
-
-    '''features = defaultdict(float)
-    features["nascoste"] = nascoste
-    features["posizione"] = pos
-    features["rischio"] = rischio'''
-
-    return features
-
 
 def featuresver2 (ambiente, a, listadict, proporzione, bombe):
     '''funzione che genera un vettore con il conteggio
@@ -231,5 +157,26 @@ def featuresver2 (ambiente, a, listadict, proporzione, bombe):
     return features
 
 '''funzione di ragionamento: ciclo sulle celle vicine tramite coord e state'''
+
+
+'''Funzione per E-SARSA(lambda)'''
+def valore_atteso_lambda (ambiente, w, nascoste, proxlistadict, epsilon, proporzione, bombe):
+
+    '''stessa cosa del while, ma in una funzione a parte per poterla richiamare 
+    più volte nel main'''
+    prossime = []
+
+    bestvalue = None
+    indicebestvalue = None
+
+    for i in nascoste:
+        x_next = featuresver2 (ambiente, i, proxlistadict, proporzione, bombe)
+        valorefeat = np.dot(w,x_next)
+        prossime.append(valorefeat)
+        if bestvalue is None or valorefeat > bestvalue:
+            bestvalue = valorefeat
+            indicebestvalue = i
+    valoreatteso = (1-epsilon) * bestvalue + epsilon* (sum (prossime) / len (prossime))
+    return valoreatteso, indicebestvalue
 
 #

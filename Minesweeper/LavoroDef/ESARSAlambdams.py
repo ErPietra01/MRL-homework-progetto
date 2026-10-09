@@ -20,7 +20,7 @@ decay = 20 / num_episodes
 gamma = 0.9
 
 '''implementazione TD(lambda)'''
-l = 0.9
+l = 3
 
 '''----------inizializzazione dell'ambiente----------'''
 
@@ -49,7 +49,7 @@ Q = defaultdict(float)'''
 '''Vettore dei valori dei numeri sulle celle (U, 0-8); questa è la struttura che verrà aggiornata
 ad ogni passo.
 Stiamo sostanzialmente creando un approssimatore lineare aggiornato tramite E-SARSA!'''
-w = np.zeros(15)
+w = np.zeros(18)
 # w = np.random.rand(12)
 
 '''----------Algoritmo E-SARSA----------'''
@@ -77,146 +77,80 @@ for e in range(num_episodes):
     '''parto da una cella casuale sul tabellone'''
     x0, y0 = rng.integers(0,Xenv), rng.integers(0,Yenv)
     '''esprimo le coordinate come indice lineare'''
-    index0 = np.ravel_multi_index((x0,y0),(Xenv,Yenv))
+    index = np.ravel_multi_index((x0,y0),(Xenv,Yenv))
 
-    '''dizionario coordinate:valore'''
-    listadict = aux.lista_dict(ambiente)
+    '''aggiungo due buffer per E-SARSA(lambda); uno per memorizzare 
+    le features dei passi precedenti e uno per memorizzare le reward corrispondenti'''
+    buf_x = []
+    buf_r = []
 
-    nascoste0 = aux.celle_nascoste(ambiente)
-    quantenascoste0 = len(nascoste0)
-
-    '''features della cella in esame
-    features = aux.genera_features(ambiente, index0, listadict, bombe/quantenascoste0, bombe)'''
-
-    '''features calcolate con il metodo nuovo (usiamo la notazione della regressione lineare)'''
-    x = aux.featuresver2 (ambiente, index0, listadict, bombe/quantenascoste0, bombe)
-    #coda.append(x)
-
-    done = None
-
-    _, reward, done = ambiente.step(index0)
-    totrew[e] += reward
-    sequenza.append(ambiente.state[index0]['coord'])
-
-    index = None
-
-    '''ora devo valutare la prima mossa casuale: faccio un passo dell'algoritmo'''
-
-    if done: #ambiente.state[index0]['value'] == 'B':
-        '''sconfitta: aggiorno la griglia con step e salvo done = True
-        Q[features] += alpha * (reward + gamma * 0 - Q[features])'''
-
-        Q = np.dot(w,x)
-        w += alpha *(reward + gamma * 0 - Q) * x
-
-    else:
-        '''Il primo passo è andato a buon fine: aggiorno la griglia
-        e salvo done = False (ovvero: applico E-SARSA)'''
-
-        '''prendo la lista degli indici delle celle ancora nascoste DOPO l'aggiornamento
-        della griglia a seguito di step'''
-        nascoste = aux.celle_nascoste(ambiente)
-        quantenascoste = len(nascoste)
-
-        '''Aggiorno il dizionario coordinate:valore a seguito di step'''
-        proxlistadict = aux.lista_dict(ambiente)
-
-        '''----------epsilon greedy----------'''
-
-        '''creo una lista dei valori delle prossime celle (per il valore atteso)'''
-        prossime = []
-        bestvalue = None
-        indicebestvalue = None
-        for i in nascoste:
-            '''proxfeat = aux.genera_features(ambiente, i, proxlistadict, bombe/quantenascoste, bombe)
-            valorefeat = Q.get(proxfeat,0.0)'''
-
-            x_next = aux.featuresver2 (ambiente, i, proxlistadict, bombe/quantenascoste, bombe)
-            #coda.append(x_next)
-
-            valorefeat = np.dot(w,x_next)
-            prossime.append(valorefeat)
-            if bestvalue is None or valorefeat > bestvalue:
-                bestvalue = valorefeat
-                indicebestvalue = i
-
-
-        valoreatteso = (1-epsilon) * bestvalue + epsilon* (sum (prossime) / len (prossime))
-        '''Q[features] += alpha * (reward + gamma * valoreatteso - Q[features])'''
-        '''x = aux.featuresver2(ambiente, index, proxlistadict)'''
-        Q = np.dot (w,x)
-        w += alpha * (reward + gamma * valoreatteso - Q) * x
-        #index = indicebestvalue
-
-        if rng.random() <= epsilon:
-            index = rng.choice(nascoste)
-        else:
-            index = indicebestvalue
-
-
-    '''----------E-SARSA----------'''
+    '''----------E-SARSA(lambda) a n passi----------'''
 
     while not done:
-        
+
+        '''dizionario coordinate:valore'''
         listadict = aux.lista_dict(ambiente)
 
-        nascoste = aux.celle_nascoste(ambiente)
-        quantenascoste = len(nascoste)
+        '''vettore delle features della cella scelta'''
+        features = aux.featuresver2 (ambiente, index, listadict, bombe/len(aux.celle_nascoste(ambiente)), bombe)
 
-        x = aux.featuresver2 (ambiente, index, listadict, bombe/quantenascoste, bombe)
-        Q = np.dot(w,x)
-
+        '''aggiornamento del tabellone'''
         _, reward, done = ambiente.step(index)
 
         if reward == 1:
-             vittorie[e] = 1
-        
+            vittorie[e] += 1
         totrew[e] += reward
         sequenza.append(ambiente.state[index]['coord'])
 
+        buf_x.append(features)
+        buf_r.append(reward)
 
-        '''Iterazione epsilon-greedy'''
-
-        if done:
-
-            w += alpha * (reward + gamma * 0 - Q) * x
-
-        else:
-            '''Il passo è andato a buon fine: aggiorno la griglia
-            e salvo done = False (ovvero: applico E-SARSA)'''
-
-            '''prendo la lista degli indici delle celle ancora nascoste DOPO l'aggiornamento
-            della griglia a seguito di step'''
+        if not done:
+            ''' celle ancora nascoste'''
             nascoste = aux.celle_nascoste(ambiente)
             quantenascoste = len(nascoste)
 
-            '''Aggiorno il dizionario coordinate:valore a seguito di step'''
+            '''informazioni sullo stato successivo'''
             proxlistadict = aux.lista_dict(ambiente)
 
+            '''valore atteso per SARSA(lambda)'''
+            # valore_atteso_lambda (ambiente, w, nascoste, proxlistadict, epsilon):
+            '''di fatto fa esattamente ciò che faceva
+            il codice originale'''
+            valoreatteso, indicebestvalue = aux.valore_atteso_lambda(ambiente, w, nascoste, 
+                                                                            proxlistadict, epsilon, bombe/quantenascoste, bombe)
 
-            '''creo una lista dei valori delle prossime celle (per il valore atteso)'''
-            prossime = []
-            bestvalue = None
-            indicebestvalue = None
-            for i in nascoste:
-                x_next = aux.featuresver2 (ambiente, i, proxlistadict, bombe/quantenascoste, bombe)
-                valorefeat = np.dot(w,x_next)
-                prossime.append(valorefeat)
-                if bestvalue is None or valorefeat > bestvalue:
-                    bestvalue = valorefeat
-                    indicebestvalue = i
-            
-            
-            valoreatteso = (1-epsilon) * bestvalue + epsilon* (sum (prossime) / len (prossime))
-            w += alpha * (reward + gamma * valoreatteso - Q) * x
+            '''aggiornamento dei buffer'''
+            if (len(buf_x)== l):
+                G = sum(gamma**i * buf_r[i] for i in range(l))
+                G+= (gamma**l)*valoreatteso
+                valorivecchi = np.dot(w,buf_x[0])
+                w += alpha * (G-valorivecchi) * buf_x[0]
+                buf_x.pop(0)
+                buf_r.pop(0)
 
-            '''epsilon greedy'''
-            if rng.random() <= epsilon:
+            '''logica greedy'''
+            if rng.random() < epsilon:
+                '''scelta casuale tra le celle ancora nascoste'''
                 index = rng.choice(nascoste)
             else:
+                '''scelta della cella con il valore atteso più alto'''
                 index = indicebestvalue
 
+        else:
+            '''termine episodio'''
+            while (buf_x):
+                lenx = len(buf_x)    
+                '''stima della reward cumulativa a 3 passi'''
+                G = sum(gamma**i * buf_r[i] for i in range(lenx))
+                '''modello attuale'''
+                valorivecchi = np.dot(w,buf_x[0])
+                '''discesa del gradiente'''
+                w += alpha * (G-valorivecchi) * buf_x[0]
+                buf_x.pop(0)
+                buf_r.pop(0)
 
+    '''RAPPRESENTAZIONE GRAFICA DELL'ANDAMENTO DELL'ALGORITMO'''
     
     '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi'''
     totwin = np.cumsum(vittorie[:e])
@@ -240,7 +174,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'reward_ep{e}.png')
+            plt.savefig(f'reward_ep{e}lambda.png')
             plt.close()
 
             plt.figure()
@@ -249,7 +183,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'winrate_ep{e}.png')
+            plt.savefig(f'winrate_ep{e}lambda.png')
             plt.close()
 
             plt.figure()
@@ -258,7 +192,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'tot_win_ep{e}.png')
+            plt.savefig(f'tot_win_ep{e}lambda.png')
             plt.close()
 
 print(w)
