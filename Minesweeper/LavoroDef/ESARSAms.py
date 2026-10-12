@@ -1,3 +1,5 @@
+'''VERSIONE CON APPROSSIMATORE LINEARE'''
+
 import random
 import numpy as np
 # import pandas as pd
@@ -17,7 +19,7 @@ alpha = 0.001
 epsilon0 = 0.1
 epsilon_min = 0.01
 decay = 50 / num_episodes #20
-gamma = 0.3 #0.9
+gamma = 0.9 #0.9
 
 '''implementazione TD(lambda)'''
 l = 0.9
@@ -56,7 +58,11 @@ w = np.zeros(18)
 
 for e in range(num_episodes):
 
-    epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
+    '''decadimento lineare: dovrebbe migliorare l'apprendimento'''
+    epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
+    
+    '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
+    #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
 
     #coda = []
 
@@ -218,18 +224,24 @@ for e in range(num_episodes):
 
 
     
-    '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi'''
+    '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi
     totwin = np.cumsum(vittorie[:e])
     totepisodes = np.arange(1,e+1)
-    cumwinrate = totwin/totepisodes
+    cumwinrate = totwin/totepisodes'''
 
     '''a fine episodio mostro la sequenza di caselle visitate'''
-    if mostra or reward == 1:
+    if mostra or reward == 1:         
         if reward == 1:
             print ("VITTORIA!")
         print(f"episodio {e}: {sequenza}")
 
         if mostra and e > 0:
+
+            '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi'''
+            totwin = np.cumsum(vittorie[:e])
+            totepisodes = np.arange(1,e+1)
+            cumwinrate = totwin/totepisodes
+
             '''comando che permette di calcolare la media 1000 episodi alla volta'''
             finestra = 1000
             media = np.convolve(totrew[:e], np.ones(finestra) / finestra, mode = 'valid')
