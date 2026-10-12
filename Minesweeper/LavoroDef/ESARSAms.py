@@ -13,7 +13,7 @@ import ausiliarie as aux
 
 '''----------parametri dell'algoritmo E-SARSA----------'''
 
-num_episodes = 150_000
+num_episodes = 200_000
 alpha = 0.001
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
@@ -60,7 +60,7 @@ for e in range(num_episodes):
 
     '''decadimento lineare: dovrebbe migliorare l'apprendimento'''
     epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
-    
+
     '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
     #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
 

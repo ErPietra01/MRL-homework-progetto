@@ -71,7 +71,7 @@ def featuresver2 (ambiente, a, listadict, tot_scoperte, proporzione, bombe):
 
     features = np.zeros(19)
     '''Termine di bias'''
-    features[10] = 1/len(valvicini) if len(valvicini) > 0 else 1
+    features[10] = 1/2
 
 
     '''for che aggiorna il conteggio per le celle nascoste e per le celle
