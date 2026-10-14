@@ -10,12 +10,15 @@ import matplotlib.pyplot as plt
 '''----------funzioni ausiliarie----------'''
 
 import ausiliarie as aux
+# import ausiliarie2 as aux
 
 '''----------parametri dell'algoritmo E-SARSA----------'''
 
 num_episodes = 200_000
-alpha = 0.001
-#epsilon = 0.1 # epsilon decrescente migliora la convergenza!
+alpha = 0.005
+alpha0 = 0.01 #test con alpha decrescente
+alpha_min = 0.0005
+epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
 decay = 50 / num_episodes #20
@@ -59,10 +62,13 @@ w = np.zeros(18)
 for e in range(num_episodes):
 
     '''decadimento lineare: dovrebbe migliorare l'apprendimento'''
-    epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
+    # epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
 
     '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
     #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
+
+    '''decadimento lineare di alpha per velocizzare l'apprendimento
+    alpha = max (alpha_min, alpha0 - (alpha0 - alpha_min)*e/num_episodes)'''
 
     #coda = []
 
@@ -252,7 +258,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'reward_ep{e}.png')
+            plt.savefig(f'ms_reward_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -261,7 +267,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'winrate_ep{e}.png')
+            plt.savefig(f'ms_winrate_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -270,7 +276,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'tot_win_ep{e}.png')
+            plt.savefig(f'ms_tot_win_ep{e}.png')
             plt.close()
 
 print(w)

@@ -62,7 +62,7 @@ def posizione (vicini):
     return pos
 
 
-def featuresver2 (ambiente, a, listadict, tot_scoperte, proporzione, bombe):
+def featuresver2 (ambiente, a, listadict,proporzione):
     '''funzione che genera un vettore con il conteggio
     dei possibili valori (U, 0-8) delle celle vicine'''
     coord = ambiente.state[a]['coord']
@@ -71,7 +71,7 @@ def featuresver2 (ambiente, a, listadict, tot_scoperte, proporzione, bombe):
 
     features = np.zeros(19)
     '''Termine di bias'''
-    features[10] = 1/2
+    features[10] = 1
 
 
     '''for che aggiorna il conteggio per le celle nascoste e per le celle
@@ -116,7 +116,7 @@ def featuresver2 (ambiente, a, listadict, tot_scoperte, proporzione, bombe):
                 if vicinisquared.count('U') == valsquared:
                     deduzione += 1
                 '''rapporto tra il valore della cella vicina e il numero di celle coperte intorno ad essa'''
-                checkvicini.append(valsquared/vicinisquared.count('U'))
+                checkvicini.append(valsquared/vicinisquared.count('U')) if vicinisquared.count('U') != 0 else 0
 
     features[11] = deduzione
 
@@ -177,32 +177,10 @@ def featuresver2 (ambiente, a, listadict, tot_scoperte, proporzione, bombe):
     features[18] = max(checkvicini) if checkvicini else 0
 
     '''normalizzazione delle features'''
-    for i in [0,1,2,3,4,5,6,7,8,9,11]:
+    for i in [0,1,2,3,4,5,6,7,8,9,11,18]:
         features[i] = features[i]/len(valvicini)
 
     return features
 
 
-
-'''Funzione per E-SARSA(lambda)'''
-'''
-def valore_atteso_lambda (ambiente, w, nascoste, proxlistadict, epsilon, proporzione, bombe):
-
-    stessa cosa del while, ma in una funzione a parte per poterla richiamare 
-    più volte nel main
-    prossime = []
-
-    bestvalue = None
-    indicebestvalue = None
-
-    for i in nascoste:
-        x_next = featuresver2 (ambiente, i, proxlistadict, proporzione, bombe)
-        valorefeat = np.dot(w,x_next)
-        prossime.append(valorefeat)
-        if bestvalue is None or valorefeat > bestvalue:
-            bestvalue = valorefeat
-            indicebestvalue = i
-    valoreatteso = (1-epsilon) * bestvalue + epsilon* (sum (prossime) / len (prossime))
-    return valoreatteso, indicebestvalue
-    '''
 #

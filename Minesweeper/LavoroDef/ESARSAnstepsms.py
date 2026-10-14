@@ -181,7 +181,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'reward_ep{e}lambda.png')
+            plt.savefig(f'nms_reward_ep{e}lambda.png')
             plt.close()
 
             plt.figure()
@@ -190,7 +190,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'winrate_ep{e}lambda.png')
+            plt.savefig(f'nms_winrate_ep{e}lambda.png')
             plt.close()
 
             plt.figure()
@@ -199,7 +199,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'tot_win_ep{e}lambda.png')
+            plt.savefig(f'nms_tot_win_ep{e}lambda.png')
             plt.close()
 
 print(w)

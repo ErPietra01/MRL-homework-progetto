@@ -14,7 +14,7 @@ import ausiliarie2 as aux
 '''----------parametri dell'algoritmo E-SARSA----------'''
 
 num_episodes = 200_000
-alpha = 0.005
+alpha = 0.001
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
@@ -245,7 +245,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'reward_ep{e}.png')
+            plt.savefig(f'ms2_reward_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -254,7 +254,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'winrate_ep{e}.png')
+            plt.savefig(f'ms2_winrate_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -263,7 +263,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'tot_win_ep{e}.png')
+            plt.savefig(f'ms2_tot_win_ep{e}.png')
             plt.close()
 
 print(w)
