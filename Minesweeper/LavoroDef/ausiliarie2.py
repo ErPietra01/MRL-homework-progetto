@@ -30,9 +30,9 @@ def lista_dict (ambiente):
         listadict[i['coord']] = i['value']
         '''per la feature 13: confronto tra le celle
         scoperte nell'intorno e le celle scoperte in generale'''
-        if i['value'] != 'U':
-            tot_scoperte.append(i['coord'])
-    return listadict, tot_scoperte
+        '''if i['value'] != 'U':
+            tot_scoperte.append(i['coord'])'''
+    return listadict #, tot_scoperte
 
 def valori_vicini (listadict, coordinate, Xenv, Yenv):
     '''funzione che valuta il valore [0-8 + U], rispettando 
@@ -62,7 +62,7 @@ def posizione (vicini):
     return pos
 
 
-def featuresver2 (ambiente, a, listadict,proporzione):
+def featuresver2 (ambiente, a, listadict,proporzione, bombe):
     '''funzione che genera un vettore con il conteggio
     dei possibili valori (U, 0-8) delle celle vicine'''
     coord = ambiente.state[a]['coord']

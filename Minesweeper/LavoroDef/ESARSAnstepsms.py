@@ -15,6 +15,8 @@ import ausiliarie as aux
 
 num_episodes = 200_000
 alpha = 0.001
+alpha0 = 0.01 #test con alpha decrescente
+alpha_min = 0.0005
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
@@ -63,6 +65,9 @@ for e in range(num_episodes):
         
     '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
     #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
+
+    '''decadimento lineare di alpha per velocizzare l'apprendimento'''
+    alpha = max (alpha_min, alpha0 - (alpha0 - alpha_min)*e/num_episodes)
 
     #coda = []
 

@@ -10,22 +10,27 @@ import matplotlib.pyplot as plt
 
 '''----------funzioni ausiliarie----------'''
 
-import ausiliarie as aux
+'''nota: le feature in ausiliarie2 partono peggio ma arrivano agli stessi 
+risultati con meno oscillazioni'''
+import ausiliarie2 as aux
 
 '''----------parametri dell'algoritmo E-SARSA----------'''
 
-num_episodes = 200_000
-alpha = 0.001
+''' NOTA IMPORTANTE: QUESTI SONO I PARAMETRI MIGLIORI FINORA;
+    PRIMA DI MODIFICARLI, BISOGNA COMMENTARLI PER POTERLI RIPRISTINARE'''
+
+num_episodes = 250_000
+#alpha = 0.001
 alpha0 = 0.01 #test con alpha decrescente
 alpha_min = 0.0005
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
 decay = 50 / num_episodes #20
-gamma = 0.9 #0.9
+gamma = 0.7 #0.9, rimettere 0.7
 
-'''implementazione TD(lambda)'''
-l = 0.9
+# nota: sembrerebbe che alpha decrescente abbia un tasso di crescita più rapido ma che tende
+# a rallentare, ma la reward è leggermente più alta
 
 '''----------inizializzazione dell'ambiente----------'''
 
@@ -52,8 +57,8 @@ vittorie = np.zeros(num_episodes)
 ad ogni passo.
 Stiamo sostanzialmente creando un approssimatore lineare aggiornato tramite E-SARSA!
 Con Double-Q espandiamo a due vettori ma l'algoritmo è molto simile'''
-w1 = np.zeros(18)
-w2 = np.zeros(18)
+w1 = np.zeros(19)
+w2 = np.zeros(19)
 
 
 '''----------Algoritmo E-SARSA----------'''
@@ -66,10 +71,9 @@ for e in range(num_episodes):
     '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
     #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
 
-    '''decadimento lineare di alpha per velocizzare l'apprendimento
-    alpha = max (alpha_min, alpha0 - (alpha0 - alpha_min)*e/num_episodes)'''
+    '''decadimento lineare di alpha per velocizzare l'apprendimento'''
+    alpha = max (alpha_min, alpha0 - (alpha0 - alpha_min)*e/num_episodes)
 
-    #coda = []
 
     '''rappresentazione grafica dell'andamento dell'algoritmo ogni 10.000 episodi'''
     mostra = (e % 10000 == 0) or (e == num_episodes - 1)
@@ -96,12 +100,8 @@ for e in range(num_episodes):
     nascoste0 = aux.celle_nascoste(ambiente)
     quantenascoste0 = len(nascoste0)
 
-    '''features della cella in esame
-    features = aux.genera_features(ambiente, index0, listadict, bombe/quantenascoste0, bombe)'''
-
     '''features calcolate con il metodo nuovo (usiamo la notazione della regressione lineare)'''
     x = aux.featuresver2 (ambiente, index0, listadict, bombe/quantenascoste0, bombe)
-    #coda.append(x)
 
     done = None
 
@@ -113,7 +113,7 @@ for e in range(num_episodes):
 
     '''ora devo valutare la prima mossa casuale: faccio un passo dell'algoritmo'''
 
-    if done: #ambiente.state[index0]['value'] == 'B':
+    if done:
 
         Q1 = np.dot(w1,x)
         Q2 = np.dot(w2,x)
@@ -273,10 +273,7 @@ for e in range(num_episodes):
 
 
     
-    '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi
-    totwin = np.cumsum(vittorie[:e])
-    totepisodes = np.arange(1,e+1)
-    cumwinrate = totwin/totepisodes'''
+    '''aggiunto il dato sul winrate cumulativo e non solo la media su 1000 episodi'''
 
     '''a fine episodio mostro la sequenza di caselle visitate'''
     if mostra or reward == 1:         
