@@ -68,7 +68,7 @@ for s = 2:S-1
     
     % stati non ammissibili: rimango nello stato attuale
     if maxa < A
-        P(s,s,maxa+1:a) = 1;
+        P(s,s,maxa+1:A) = 1;
     end
     
 end
@@ -91,6 +91,8 @@ for s = 1:S
         R(s,a) = vittoria*gain + sconfitta*lose;
     end
 end
+R(1,:) = 0;
+R(S,:) = 0;
 
 % stato-azione illegali in modo tale che non possano essere scelte negli
 % algoritmi

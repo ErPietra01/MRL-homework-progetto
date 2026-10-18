@@ -151,7 +151,7 @@ plot(cumsum(rewards2))
 % perciò entrambi imparano a vincere quasi subito perché in poche
 % iterazioni il gioco diventa deterministico! Infatti nessuno dei due
 % giocatori è portato a cambiare la propria strategia, poiché il G1 ha
-% imparato che, il G2 sceglierà sempre 5, a cui risponderà con 3, viceversa
+% imparato che il G2 sceglierà sempre 5, a cui risponderà con 3, viceversa
 % per il G2.
 % se invece il giocatore 2 ha come mossa dell'avversario la mossa scelta
 % all'istante corrente, il risultato è infine lo stesso, ma entrambi i

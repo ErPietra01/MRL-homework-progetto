@@ -1,10 +1,3 @@
-% ciao test
-% non test
-
-% e mo che succede
-
-% modifica master per verificare branch
-
 % Bandit: l'obiettivo è scegliere la mossa più adatta all'azione inserita;
 % a differenza dei casi visti negli esempi, qui ho, per ogni azione, una
 % reward positiva, nulla o negativa. Lo switch case dovrà quindi tener

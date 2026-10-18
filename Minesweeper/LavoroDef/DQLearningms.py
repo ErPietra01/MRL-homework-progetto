@@ -19,15 +19,17 @@ import ausiliarie2 as aux
 ''' NOTA IMPORTANTE: QUESTI SONO I PARAMETRI MIGLIORI FINORA;
     PRIMA DI MODIFICARLI, BISOGNA COMMENTARLI PER POTERLI RIPRISTINARE'''
 
-num_episodes = 250_000
+num_episodes = 350_000
 #alpha = 0.001
 alpha0 = 0.01 #test con alpha decrescente
-alpha_min = 0.0005
+alpha_min = 0.001 #0.0005
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
 epsilon_min = 0.01
 decay = 50 / num_episodes #20
-gamma = 0.7 #0.9, rimettere 0.7
+gamma = 0.9 # rimettere 0.7
+# nota: gamma = 0.6 (DQ2)è più veloce ma sembra avere risultati peggiori rispetto a 0.7. Inoltre
+# l'algoritmo con 0.7 (DQ)sembra fermarsi intorno a 320.000 episodi
 
 # nota: sembrerebbe che alpha decrescente abbia un tasso di crescita più rapido ma che tende
 # a rallentare, ma la reward è leggermente più alta
@@ -35,14 +37,14 @@ gamma = 0.7 #0.9, rimettere 0.7
 '''----------inizializzazione dell'ambiente----------'''
 
 from minesweeper_env import MinesweeperEnv
-Xenv = 8
-Yenv = 8
+Xenv = 4
+Yenv = 4
 '''percentuale di bombe in base alla difficoltà:
 facile: circa 12%
 medio: circa 16%
 difficile: circa 20%
 '''
-bombe = 8
+bombe = 3
 ambiente = MinesweeperEnv(width = Xenv, height = Yenv, n_mines = bombe)
 
 '''----------conteggi----------'''
@@ -298,7 +300,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'DQ_reward_ep{e}.png')
+            plt.savefig(f'DQ4_reward_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -307,7 +309,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'DQ_winrate_ep{e}.png')
+            plt.savefig(f'DQ4_winrate_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -316,7 +318,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'DQ_tot_win_ep{e}.png')
+            plt.savefig(f'DQ4_tot_win_ep{e}.png')
             plt.close()
 
 print(w1)
