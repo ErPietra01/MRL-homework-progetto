@@ -1,20 +1,6 @@
 # from collections import defaultdict
 import numpy as np
-'''In questo file sono presenti alcune funzioni ausiliarie
-per far comunicare il main con l'ambiente e per facilitare
-l'utilizzo di Q come dizionario
-L'ambiente usa principalmente un indice, ma per la valutazione delle features
-è più comodo usare le coordinate, motivo per cui utilizziamo entrambe
 
-NOTA: file NUOVO, non sovrascrive ausiliarie2.py. celle_nascoste, lista_dict,
-valori_vicini, posizione e featuresver2 sono copiate identiche da ausiliarie2.py
-(stesse features, stessa normalizzazione). L'unica aggiunta è
-valore_atteso_lambda, portata da ausiliarie.py (dove viene usata da
-ESARSAnstepsms.py), adattata per richiamare la featuresver2 di questo file.
-Serve a nDQ.py per calcolare il valore atteso E-SARSA su un singolo vettore
-dei pesi alla volta: nDQ.py la richiama due volte per passo (una per w1, una
-per w2) per poter fare l'aggiornamento Double Q-learning anche con i ritorni
-a n passi.'''
 
 def celle_nascoste (ambiente):
     nascoste = []
@@ -172,13 +158,7 @@ def featuresver2 (ambiente, a, listadict,proporzione, bombe):
     return features
 
 
-'''Funzione per l'aggiornamento a n passi (porting di valore_atteso_lambda da
-ausiliarie.py, usata in ESARSAnstepsms.py): calcola il valore atteso E-SARSA
-sulle celle ancora nascoste a partire da UN SOLO vettore dei pesi w.
-In nDQ.py viene richiamata due volte per passo (una con w1, una con w2) così
-da poter fare il cross-bootstrap tipico del Double Q-learning anche con
-ritorni a n passi: per aggiornare w1 si usa il valore atteso restituito da
-questa funzione chiamata con w2, e viceversa.'''
+'''Funzione per il calcolo del valore atteso'''
 def valore_atteso_lambda (ambiente, w, nascoste, proxlistadict, epsilon, proporzione, bombe):
 
     prossime = []

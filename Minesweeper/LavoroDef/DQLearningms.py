@@ -1,6 +1,7 @@
 '''VERSIONE CON DOUBLE Q-LEARNING'''
 
 import random
+# import math
 from matplotlib.pylab import rand
 import numpy as np
 # import pandas as pd
@@ -19,32 +20,40 @@ import ausiliarie2 as aux
 ''' NOTA IMPORTANTE: QUESTI SONO I PARAMETRI MIGLIORI FINORA;
     PRIMA DI MODIFICARLI, BISOGNA COMMENTARLI PER POTERLI RIPRISTINARE'''
 
-num_episodes = 350_000
+num_episodes = 1_000_000
 #alpha = 0.001
-alpha0 = 0.01 #test con alpha decrescente
-alpha_min = 0.001 #0.0005
+alpha0 = 0.01 #test con alpha decrescente; ottimo:0,01
+alpha_min = 0.001 #0.0005 (non migliora)
 #epsilon = 0.1 # epsilon decrescente migliora la convergenza!
 epsilon0 = 0.1
-epsilon_min = 0.01
+epsilon_min = 0.01 #0.01
 decay = 50 / num_episodes #20
-gamma = 0.9 # rimettere 0.7
-# nota: gamma = 0.6 (DQ2)è più veloce ma sembra avere risultati peggiori rispetto a 0.7. Inoltre
-# l'algoritmo con 0.7 (DQ)sembra fermarsi intorno a 320.000 episodi
+#gamma = 0.9 # rimettere 0.7
 
+'''tentativo con gamma crescente:'''
+gamma0 = 0.6
+gamma_max = 0.9
+
+k = num_episodes/350_000
+# kg è per velocizzare il decadimento di gamma
+kg = num_episodes/100_000
+
+# Nota: questi sono i parametri con cui è stato rappresentato DQ2
 # nota: sembrerebbe che alpha decrescente abbia un tasso di crescita più rapido ma che tende
 # a rallentare, ma la reward è leggermente più alta
+
 
 '''----------inizializzazione dell'ambiente----------'''
 
 from minesweeper_env import MinesweeperEnv
-Xenv = 4
-Yenv = 4
+Xenv = 8
+Yenv = 8
 '''percentuale di bombe in base alla difficoltà:
 facile: circa 12%
 medio: circa 16%
 difficile: circa 20%
 '''
-bombe = 3
+bombe = 8
 ambiente = MinesweeperEnv(width = Xenv, height = Yenv, n_mines = bombe)
 
 '''----------conteggi----------'''
@@ -67,18 +76,27 @@ w2 = np.zeros(19)
 
 for e in range(num_episodes):
 
-    '''decadimento lineare: dovrebbe migliorare l'apprendimento'''
-    epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
+    '''decadimento lineare: migliora l'apprendimento'''
+    #epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
+
+    '''decadimento lineare proporzionale al numero di episodi'''
+    epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*(e*k)/num_episodes)
 
     '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
     #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
 
-    '''decadimento lineare di alpha per velocizzare l'apprendimento'''
-    alpha = max (alpha_min, alpha0 - (alpha0 - alpha_min)*e/num_episodes)
+    '''decadimento logaritmico: stesso effetto del decadimento esponenziale'''
+    # epsilon = max(epsilon_min, math.log(epsilon0 - epsilon_min) * e / (num_episodes))
+
+    '''decadimento lineare di alpha proporzionale al numero di episodi'''
+    alpha = max (alpha_min, alpha0 - (alpha0 - alpha_min)*(e*k)/num_episodes)
+
+    '''crescita lineare di gamma proporzionale al numero di episodi'''
+    gamma = min (gamma_max, gamma0 +(gamma_max - gamma0) * (e*kg)/num_episodes)
 
 
-    '''rappresentazione grafica dell'andamento dell'algoritmo ogni 10.000 episodi'''
-    mostra = (e % 10000 == 0) or (e == num_episodes - 1)
+    '''rappresentazione grafica dell'andamento dell'algoritmo ogni 50.000 episodi'''
+    mostra = (e % 50000 == 0) or (e == num_episodes - 1)
 
     '''lista delle caselle visitate: utile per una stampa
     in caso di vittoria e ogni 10.000 passi'''
@@ -300,7 +318,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'DQ4_reward_ep{e}.png')
+            plt.savefig(f'2kDQ_reward_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -309,7 +327,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'DQ4_winrate_ep{e}.png')
+            plt.savefig(f'2kDQ_winrate_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -318,14 +336,25 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'DQ4_tot_win_ep{e}.png')
+            plt.savefig(f'2kDQ_tot_win_ep{e}.png')
             plt.close()
 
 print(w1)
 print(w2)
 
         
-
+'''
+Parametri di kDQ:
+num_episodes = 1_000_000
+#alpha = 0.001
+alpha0 = 0.01 #test con alpha decrescente; ottimo:0,01
+alpha_min = 0.001 #0.0005 (non migliora)
+epsilon0 = 0.1
+epsilon_min = 0.01 #0.01
+decay = 50 / num_episodes #20
+gamma = 0.9 # rimettere 0.7
+k = num_episodes/350_000
+'''
 
 '''----------sezione----------'''
 #
@@ -334,5 +363,4 @@ print(w2)
 Invece di aggiornare un dizionario, aggiorno i valori di ciascun numero che si può trovare sulle celle
 scoperte; l'azione viene presa sulla base dei valori che circondano la cella scelta.
 Non è necessario un cambio drastico dell'algoritmo o delle ausiliarie
-maledizione, è un approssimatore lineare.
 '''

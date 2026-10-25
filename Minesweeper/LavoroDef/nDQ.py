@@ -13,12 +13,13 @@ import nDQaux as aux
 '''----------parametri dell'algoritmo----------'''
 
 num_episodes = 350_000
-alpha0 = 0.01 #primo test con 0.01
-alpha_min = 0.001 # primo test con 0.001
-epsilon0 = 0.1
-epsilon_min = 0.02
+alpha0 = 0.015 #primo test con 0.01
+alpha_min = 0.0005 # primo test con 0.001
+epsilon0 = 0.1 #0.1
+epsilon_min = 0.02 #0.01
 decay = 50 / num_episodes
-gamma = 0.9
+gamma = 0.7 
+'''test attuale con i parametri presenti; salvare prima di cambiarli'''
 
 
 # nota: primo test fallimentare dopo 170.000 episodi
@@ -37,6 +38,8 @@ difficile: circa 20%
 '''
 bombe = 8
 ambiente = MinesweeperEnv(width = Xenv, height = Yenv, n_mines = bombe)
+
+'''nota: nDQ sembra funzonare meglio su 4x4'''
 
 '''----------conteggi----------'''
 
