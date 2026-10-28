@@ -80,7 +80,10 @@ for e in range(num_episodes):
     #epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*e/num_episodes)
 
     '''decadimento lineare proporzionale al numero di episodi'''
-    epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*(e*k)/num_episodes)
+    if e <= 400_000:
+        epsilon = max (epsilon_min, epsilon0 - (epsilon0 - epsilon_min)*(e*k)/num_episodes)
+    else:
+        epsilon = 0
 
     '''decadimento esponenziale: l'algoritmo ha smesso di esplorare quasi subito'''
     #epsilon = epsilon_min + (epsilon0 - epsilon_min) * np.exp(-decay * e)
@@ -318,7 +321,7 @@ for e in range(num_episodes):
             plt.xlabel('Episodio')
             plt.ylabel('Reward (media mobile su 1000 episodi)')
             plt.title(f'Andamento della reward fino all\'episodio {e}')
-            plt.savefig(f'2kDQ_reward_ep{e}.png')
+            plt.savefig(f'e0DQ_reward_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -327,7 +330,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria (media mobile su 1000 episodi)')
             plt.title(f'Tasso di vittoria fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'2kDQ_winrate_ep{e}.png')
+            plt.savefig(f'e0kDQ_winrate_ep{e}.png')
             plt.close()
 
             plt.figure()
@@ -336,7 +339,7 @@ for e in range(num_episodes):
             plt.ylabel('Tasso di vittoria cumulativo (vittorie / episodi giocati)')
             plt.title(f'Tasso di vittoria cumulativo fino all\'episodio {e}')
             plt.ylim(0, 1)
-            plt.savefig(f'2kDQ_tot_win_ep{e}.png')
+            plt.savefig(f'e0kDQ_tot_win_ep{e}.png')
             plt.close()
 
 print(w1)
